@@ -7,95 +7,19 @@
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
   <style>
-    /* ... (todos los estilos se mantienen igual) ... */
-    body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    #titulo {
-      position: absolute;
-      top: 20px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      color: white;
-      font-size: 1.4rem;
-      font-weight: 700;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.9);
-      background: rgba(0, 0, 0, 0.45);
-      backdrop-filter: blur(6px);
-      padding: 12px 20px;
-      width: fit-content;
-      margin: 0 auto;
-      border-radius: 40px;
-      border: 1px solid rgba(255, 215, 0, 0.3);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      z-index: 20;
-      pointer-events: none;
-      letter-spacing: 0.5px;
-      line-height: 1.3;
-      max-width: 90%;
-    }
+    /* ... (todos los estilos iguales) ... */
+    body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+    #titulo { position: absolute; top: 20px; left: 0; right: 0; text-align: center; color: white; font-size: 1.4rem; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,0.9); background: rgba(0,0,0,0.45); backdrop-filter: blur(6px); padding: 12px 20px; width: fit-content; margin: 0 auto; border-radius: 40px; border: 1px solid rgba(255,215,0,0.3); z-index: 20; pointer-events: none; max-width: 90%; }
     #titulo .destacar { color: #ffd700; }
-    #info-panel {
-      position: absolute;
-      bottom: 70px;
-      left: 20px;
-      right: 20px;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(8px);
-      color: white;
-      padding: 20px 25px;
-      border-radius: 16px;
-      text-align: center;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,255,255,0.15);
-      pointer-events: none;
-      z-index: 10;
-      max-width: 500px;
-      margin: 0 auto;
-    }
+    #info-panel { position: absolute; bottom: 70px; left: 20px; right: 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); color: white; padding: 20px 25px; border-radius: 16px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); pointer-events: none; z-index: 10; max-width: 500px; margin: 0 auto; }
     #info-panel h2 { margin: 0 0 8px 0; font-size: 1.6rem; font-weight: 700; color: #ffd700; }
     #info-panel p { margin: 5px 0; font-size: 1rem; line-height: 1.5; opacity: 0.9; }
     #info-panel .cientifico { font-style: italic; color: #aaddff; font-size: 0.9rem; }
-    #curiosidad-panel {
-      position: absolute;
-      top: 90px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
-      color: #fff;
-      padding: 15px 20px;
-      border-radius: 12px;
-      max-width: 260px;
-      font-size: 0.95rem;
-      line-height: 1.4;
-      border-left: 5px solid #ffd700;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-      pointer-events: none;
-      z-index: 10;
-      text-align: left;
-      transition: opacity 0.3s ease;
-    }
+    #curiosidad-panel { position: absolute; top: 90px; right: 20px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); color: #fff; padding: 15px 20px; border-radius: 12px; max-width: 260px; font-size: 0.95rem; line-height: 1.4; border-left: 5px solid #ffd700; box-shadow: 0 4px 20px rgba(0,0,0,0.4); pointer-events: none; z-index: 10; text-align: left; }
     #curiosidad-panel strong { color: #ffd700; display: block; margin-bottom: 5px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
-    #curiosidad-panel .curiosidad-texto { font-size: 0.95rem; }
-    #instruccion {
-      position: absolute;
-      bottom: 15px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 0.95rem;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.9);
-      pointer-events: none;
-      z-index: 10;
-      background: rgba(0,0,0,0.25);
-      backdrop-filter: blur(4px);
-      padding: 6px 16px;
-      width: fit-content;
-      margin: 0 auto;
-      border-radius: 30px;
-      letter-spacing: 0.3px;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
+    #instruccion { position: absolute; bottom: 15px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.8); font-size: 0.95rem; text-shadow: 0 2px 10px rgba(0,0,0,0.9); pointer-events: none; z-index: 10; background: rgba(0,0,0,0.25); backdrop-filter: blur(4px); padding: 6px 16px; width: fit-content; margin: 0 auto; border-radius: 30px; }
+    /* Mensaje de depuración (amarillo) */
+    #debug { position: absolute; top: 120px; left: 20px; background: rgba(0,0,0,0.8); color: #ffdd00; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; max-width: 80%; z-index: 30; pointer-events: none; border: 1px solid #ffdd00; }
     @media (max-width: 600px) {
       #titulo { font-size: 1.0rem; padding: 10px 16px; top: 12px; }
       #curiosidad-panel { top: 80px; right: 10px; max-width: 170px; padding: 12px 14px; font-size: 0.8rem; }
@@ -103,6 +27,7 @@
       #info-panel h2 { font-size: 1.2rem; }
       #info-panel p { font-size: 0.85rem; }
       #instruccion { font-size: 0.8rem; bottom: 10px; padding: 4px 12px; }
+      #debug { top: 100px; left: 10px; font-size: 0.8rem; padding: 6px 10px; }
     }
   </style>
 </head>
@@ -115,16 +40,17 @@
     <p id="caracteristicas"><strong>Características:</strong> ---</p>
     <p id="envergadura"><strong>Envergadura / Tamaño:</strong> ---</p>
   </div>
-  <div id="instruccion">🔍 Apunta la cámara al marcador específico de cada ave</div>
+  <div id="instruccion">🔍 Apunta la cámara al marcador</div>
+  <div id="debug">⏳ Inicializando...</div>
 
-  <!-- Escena AR: sin marcador por defecto, se configurará con JS -->
-  <a-scene embedded arjs>
+  <!-- Escena AR con marcador por defecto (hiro) para probar -->
+  <a-scene embedded arjs="debugUIEnabled: true;">
     <a-entity id="modelo-ave" gltf-model="" scale="0.15 0.15 0.15" position="0 0 0"></a-entity>
   </a-scene>
 
   <script>
     // ============================================================
-    // 1. DATOS DE LAS 4 AVES CON RUTA DE MARCADOR
+    // 1. DATOS DE LAS 4 AVES
     // ============================================================
     const avesData = {
       1: {
@@ -135,7 +61,7 @@
         curiosidad: "Es un ave muy sociable y ruidosa. Su nombre 'pijije' imita su característico silbido. Se le puede ver posado en árboles, algo inusual en patos.",
         modelo: "models/ave1.glb",
         escala: "0.15 0.15 0.15",
-        marcador: "markers/pattern-ave1.patt"   // Ruta al archivo .patt
+        marcador: "markers/pattern-ave1.patt"
       },
       2: {
         nombre: "🐔 Chachalaca",
@@ -182,7 +108,7 @@
     const ave = avesData[id];
 
     // ============================================================
-    // 3. ACTUALIZAR PANELES DE INFORMACIÓN
+    // 3. ACTUALIZAR PANELES
     // ============================================================
     document.getElementById('nombre-ave').textContent = ave.nombre;
     document.getElementById('cientifico').textContent = ave.cientifico;
@@ -191,21 +117,44 @@
     document.getElementById('curiosidad-texto').textContent = ave.curiosidad;
 
     // ============================================================
-    // 4. CARGAR MODELO 3D CON SU ESCALA
+    // 4. CARGAR MODELO Y CONFIGURAR MARCADOR
     // ============================================================
     const modeloEntity = document.getElementById('modelo-ave');
     modeloEntity.setAttribute('gltf-model', 'url(' + ave.modelo + ')');
     modeloEntity.setAttribute('scale', ave.escala);
 
     // ============================================================
-    // 5. CONFIGURAR EL MARCADOR PERSONALIZADO
+    // 5. CONFIGURAR MARCADOR PERSONALIZADO (si existe)
     // ============================================================
     const scene = document.querySelector('a-scene');
+    const debugEl = document.getElementById('debug');
+
     if (ave.marcador) {
-      scene.setAttribute('arjs', `patternUrl: ${ave.marcador}`);
+      scene.setAttribute('arjs', `patternUrl: ${ave.marcador}; debugUIEnabled: true;`);
+      debugEl.textContent = `🔎 Usando marcador: ${ave.marcador}`;
+    } else {
+      debugEl.textContent = `🔎 Usando marcador por defecto (hiro)`;
     }
 
-    console.log(`Cargando ave ${id}: ${ave.nombre} con marcador ${ave.marcador}`);
+    // ============================================================
+    // 6. DETECTAR CUANDO EL MODELO SE CARGA O FALLA
+    // ============================================================
+    modeloEntity.addEventListener('model-loaded', () => {
+      debugEl.textContent = '✅ Modelo cargado correctamente';
+      debugEl.style.color = '#00ff88';
+    });
+
+    modeloEntity.addEventListener('model-error', (e) => {
+      debugEl.textContent = `❌ Error al cargar el modelo: ${e.detail}`;
+      debugEl.style.color = '#ff4444';
+    });
+
+    // También mostrar si la cámara se activa
+    scene.addEventListener('camera-init', () => {
+      debugEl.textContent += ' 📷 Cámara activa';
+    });
+
+    console.log(`Cargando ave ${id}: ${ave.nombre}`);
   </script>
 </body>
 </html>
