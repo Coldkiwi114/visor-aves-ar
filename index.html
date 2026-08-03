@@ -7,7 +7,7 @@
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
   <style>
-    /* ... (todos los estilos iguales) ... */
+    /* ... todos los estilos anteriores se mantienen ... */
     body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
     #titulo { position: absolute; top: 20px; left: 0; right: 0; text-align: center; color: white; font-size: 1.4rem; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,0.9); background: rgba(0,0,0,0.45); backdrop-filter: blur(6px); padding: 12px 20px; width: fit-content; margin: 0 auto; border-radius: 40px; border: 1px solid rgba(255,215,0,0.3); z-index: 20; pointer-events: none; max-width: 90%; }
     #titulo .destacar { color: #ffd700; }
@@ -18,8 +18,47 @@
     #curiosidad-panel { position: absolute; top: 90px; right: 20px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); color: #fff; padding: 15px 20px; border-radius: 12px; max-width: 260px; font-size: 0.95rem; line-height: 1.4; border-left: 5px solid #ffd700; box-shadow: 0 4px 20px rgba(0,0,0,0.4); pointer-events: none; z-index: 10; text-align: left; }
     #curiosidad-panel strong { color: #ffd700; display: block; margin-bottom: 5px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
     #instruccion { position: absolute; bottom: 15px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.8); font-size: 0.95rem; text-shadow: 0 2px 10px rgba(0,0,0,0.9); pointer-events: none; z-index: 10; background: rgba(0,0,0,0.25); backdrop-filter: blur(4px); padding: 6px 16px; width: fit-content; margin: 0 auto; border-radius: 30px; }
-    /* Mensaje de depuración (amarillo) */
     #debug { position: absolute; top: 120px; left: 20px; background: rgba(0,0,0,0.8); color: #ffdd00; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; max-width: 80%; z-index: 30; pointer-events: none; border: 1px solid #ffdd00; }
+
+    /* Controles de escala (aparecen solo si se toca la pantalla) */
+    #controles {
+      position: absolute;
+      bottom: 120px;
+      left: 20px;
+      z-index: 40;
+      display: flex;
+      gap: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 15px;
+      border-radius: 50px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    #controles button {
+      background: #ffd700;
+      border: none;
+      color: black;
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 8px 18px;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      transition: transform 0.1s;
+      pointer-events: auto;
+    }
+    #controles button:active {
+      transform: scale(0.9);
+    }
+    #controles span {
+      color: white;
+      font-size: 1rem;
+      align-self: center;
+      padding: 0 10px;
+      min-width: 60px;
+      text-align: center;
+    }
+
     @media (max-width: 600px) {
       #titulo { font-size: 1.0rem; padding: 10px 16px; top: 12px; }
       #curiosidad-panel { top: 80px; right: 10px; max-width: 170px; padding: 12px 14px; font-size: 0.8rem; }
@@ -28,6 +67,9 @@
       #info-panel p { font-size: 0.85rem; }
       #instruccion { font-size: 0.8rem; bottom: 10px; padding: 4px 12px; }
       #debug { top: 100px; left: 10px; font-size: 0.8rem; padding: 6px 10px; }
+      #controles { bottom: 100px; left: 10px; padding: 8px 12px; gap: 5px; }
+      #controles button { font-size: 1.2rem; padding: 5px 12px; }
+      #controles span { font-size: 0.8rem; min-width: 40px; }
     }
   </style>
 </head>
@@ -40,11 +82,18 @@
     <p id="caracteristicas"><strong>Características:</strong> ---</p>
     <p id="envergadura"><strong>Envergadura / Tamaño:</strong> ---</p>
   </div>
-  <div id="instruccion">🔍 Apunta la cámara al marcador</div>
+  <div id="instruccion">🔍 Apunta la cámara al marcador HIRO</div>
   <div id="debug">⏳ Inicializando...</div>
 
-  <!-- Escena AR con marcador por defecto (hiro) para probar -->
-  <a-scene embedded arjs="debugUIEnabled: true;">
+  <!-- Controles de escala -->
+  <div id="controles">
+    <button id="btn-menos">➖</button>
+    <span id="escala-texto">0.15</span>
+    <button id="btn-mas">➕</button>
+  </div>
+
+  <!-- Escena AR con marcador HIRO por defecto -->
+  <a-scene embedded arjs="debugUIEnabled: true; sourceType: webcam;">
     <a-entity id="modelo-ave" gltf-model="" scale="0.15 0.15 0.15" position="0 0 0"></a-entity>
   </a-scene>
 
@@ -60,7 +109,7 @@
         envergadura: "Mide unos 48 cm de largo",
         curiosidad: "Es un ave muy sociable y ruidosa. Su nombre 'pijije' imita su característico silbido. Se le puede ver posado en árboles, algo inusual en patos.",
         modelo: "models/ave1.glb",
-        escala: "0.15 0.15 0.15",
+        escala: 0.15,
         marcador: "markers/pattern-ave1.patt"
       },
       2: {
@@ -70,7 +119,7 @@
         envergadura: "Tamaño similar a un faisán",
         curiosidad: "Es casi siempre escuchada antes de ser vista, ya que sus llamadas son un ruidoso y rítmico 'chacar-rac-rac' que retumba en el bosque.",
         modelo: "models/ave2.glb",
-        escala: "0.2 0.2 0.2",
+        escala: 0.2,
         marcador: "markers/pattern-ave2.patt"
       },
       3: {
@@ -80,7 +129,7 @@
         envergadura: "Es una garza grande, de patas cortas",
         curiosidad: "Es un ave solitaria y de hábitos reservados. Prefiere cazar pacientemente en manglares y humedales, alimentándose de peces, ranas y cangrejos.",
         modelo: "models/ave3.glb",
-        escala: "0.12 0.12 0.12",
+        escala: 0.12,
         marcador: "markers/pattern-ave3.patt"
       },
       4: {
@@ -90,7 +139,7 @@
         envergadura: "Mide entre 21 y 26 cm de largo",
         curiosidad: "Su nombre proviene de su canto, que suena como 'bien-te-veo'. Es un ave muy territorial y oportunista, que come casi de todo.",
         modelo: "models/ave4.glb",
-        escala: "0.18 0.18 0.18",
+        escala: 0.18,
         marcador: "markers/pattern-ave4.patt"
       }
     };
@@ -117,27 +166,38 @@
     document.getElementById('curiosidad-texto').textContent = ave.curiosidad;
 
     // ============================================================
-    // 4. CARGAR MODELO Y CONFIGURAR MARCADOR
+    // 4. CARGAR MODELO Y CONFIGURAR MARCADOR (usamos HIRO para prueba)
     // ============================================================
     const modeloEntity = document.getElementById('modelo-ave');
-    modeloEntity.setAttribute('gltf-model', 'url(' + ave.modelo + ')');
-    modeloEntity.setAttribute('scale', ave.escala);
-
-    // ============================================================
-    // 5. CONFIGURAR MARCADOR PERSONALIZADO (si existe)
-    // ============================================================
-    const scene = document.querySelector('a-scene');
     const debugEl = document.getElementById('debug');
 
-    if (ave.marcador) {
-      scene.setAttribute('arjs', `patternUrl: ${ave.marcador}; debugUIEnabled: true;`);
-      debugEl.textContent = `🔎 Usando marcador: ${ave.marcador}`;
-    } else {
-      debugEl.textContent = `🔎 Usando marcador por defecto (hiro)`;
-    }
+    // Intentar cargar el modelo
+    modeloEntity.setAttribute('gltf-model', 'url(' + ave.modelo + ')');
+    
+    // Usar escala inicial desde los datos (pero permitimos cambiarla)
+    let escalaActual = ave.escala || 0.15;
+    modeloEntity.setAttribute('scale', `${escalaActual} ${escalaActual} ${escalaActual}`);
+    document.getElementById('escala-texto').textContent = escalaActual.toFixed(2);
 
     // ============================================================
-    // 6. DETECTAR CUANDO EL MODELO SE CARGA O FALLA
+    // 5. CONTROLES DE ESCALA EN VIVO
+    // ============================================================
+    document.getElementById('btn-mas').addEventListener('click', () => {
+      escalaActual = Math.min(escalaActual + 0.05, 5.0);
+      modeloEntity.setAttribute('scale', `${escalaActual} ${escalaActual} ${escalaActual}`);
+      document.getElementById('escala-texto').textContent = escalaActual.toFixed(2);
+      debugEl.textContent = `🔍 Escala: ${escalaActual.toFixed(2)}`;
+    });
+
+    document.getElementById('btn-menos').addEventListener('click', () => {
+      escalaActual = Math.max(escalaActual - 0.05, 0.01);
+      modeloEntity.setAttribute('scale', `${escalaActual} ${escalaActual} ${escalaActual}`);
+      document.getElementById('escala-texto').textContent = escalaActual.toFixed(2);
+      debugEl.textContent = `🔍 Escala: ${escalaActual.toFixed(2)}`;
+    });
+
+    // ============================================================
+    // 6. DETECTAR EVENTOS
     // ============================================================
     modeloEntity.addEventListener('model-loaded', () => {
       debugEl.textContent = '✅ Modelo cargado correctamente';
@@ -149,7 +209,7 @@
       debugEl.style.color = '#ff4444';
     });
 
-    // También mostrar si la cámara se activa
+    const scene = document.querySelector('a-scene');
     scene.addEventListener('camera-init', () => {
       debugEl.textContent += ' 📷 Cámara activa';
     });
