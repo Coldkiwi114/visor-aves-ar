@@ -7,7 +7,7 @@
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
   <style>
-    /* ===== ESTILOS (igual que antes) ===== */
+    /* Todos los estilos iguales que antes */
     body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
     #titulo { position: absolute; top: 20px; left: 0; right: 0; text-align: center; color: white; font-size: 1.4rem; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,0.9); background: rgba(0,0,0,0.45); backdrop-filter: blur(6px); padding: 12px 20px; width: fit-content; margin: 0 auto; border-radius: 40px; border: 1px solid rgba(255,215,0,0.3); z-index: 20; pointer-events: none; max-width: 90%; }
     #titulo .destacar { color: #ffd700; }
@@ -19,8 +19,32 @@
     #curiosidad-panel strong { color: #ffd700; display: block; margin-bottom: 5px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
     #instruccion { position: absolute; bottom: 15px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.8); font-size: 0.95rem; text-shadow: 0 2px 10px rgba(0,0,0,0.9); pointer-events: none; z-index: 10; background: rgba(0,0,0,0.25); backdrop-filter: blur(4px); padding: 6px 16px; width: fit-content; margin: 0 auto; border-radius: 30px; }
     #debug { position: absolute; top: 120px; left: 20px; background: rgba(0,0,0,0.8); color: #ffdd00; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; max-width: 80%; z-index: 30; pointer-events: none; border: 1px solid #ffdd00; }
-    #controles { position: absolute; bottom: 120px; left: 20px; z-index: 40; display: flex; gap: 10px; background: rgba(0,0,0,0.7); padding: 10px 15px; border-radius: 50px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); }
-    #controles button { background: #ffd700; border: none; color: black; font-size: 1.5rem; font-weight: bold; padding: 8px 18px; border-radius: 30px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.3); transition: transform 0.1s; pointer-events: auto; }
+    #controles {
+      position: absolute;
+      bottom: 120px;
+      left: 20px;
+      z-index: 40;
+      display: flex;
+      gap: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 15px;
+      border-radius: 50px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    #controles button {
+      background: #ffd700;
+      border: none;
+      color: black;
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 8px 18px;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      transition: transform 0.1s;
+      pointer-events: auto;
+    }
     #controles button:active { transform: scale(0.9); }
     #controles span { color: white; font-size: 1rem; align-self: center; padding: 0 10px; min-width: 60px; text-align: center; }
     @media (max-width: 600px) {
@@ -46,33 +70,74 @@
     <p id="caracteristicas"><strong>Características:</strong> ---</p>
     <p id="envergadura"><strong>Envergadura / Tamaño:</strong> ---</p>
   </div>
-  <div id="instruccion">🔍 Apunta la cámara al marcador (HIRO o personalizado)</div>
+  <div id="instruccion">🔍 Apunta la cámara al marcador HIRO</div>
   <div id="debug">⏳ Inicializando...</div>
 
   <div id="controles">
     <button id="btn-menos">➖</button>
-    <span id="escala-texto">3.00</span>
+    <span id="escala-texto">5.00</span>
     <button id="btn-mas">➕</button>
   </div>
 
-  <!-- Escena AR -->
-  <a-scene embedded arjs="debugUIEnabled: true; sourceType: webcam;">
-    <!-- CUBO DE PRUEBA (descomenta para probar) -->
-    <!-- <a-box position="0 0.5 0" material="color: red;" scale="0.5 0.5 0.5"></a-box> -->
-
-    <!-- MODELO 3D con escala y posición ajustadas -->
-    <a-entity id="modelo-ave" gltf-model="" scale="3 3 3" position="0 0.5 0"></a-entity>
+  <!-- Escena AR con marcador HIRO y precision media -->
+  <a-scene embedded arjs="debugUIEnabled: true; sourceType: webcam;" renderer="precision: medium">
+    <!-- CUBO ROJO DE PRUEBA (se mostrará si la AR funciona) -->
+    <a-box position="0 0.5 0" material="color: red;" scale="0.5 0.5 0.5"></a-box>
+    
+    <!-- TU MODELO -->
+    <a-entity id="modelo-ave" gltf-model="" scale="5 5 5" position="0 0.5 0"></a-entity>
   </a-scene>
 
   <script>
-    // DATOS DE LAS AVES (mismos que antes)
+    // ============================================================
+    // 1. DATOS DE LAS 4 AVES (escala base aumentada a 5.0)
+    // ============================================================
     const avesData = {
-      1: { nombre: "🦆 Pijije Aliblanco", cientifico: "Dendrocygna autumnalis", caracteristicas: "Pato mediano con pico y patas de color rosa coral. Espalda castaña rojiza y alas negras con una gran mancha blanca muy visible en vuelo.", envergadura: "Mide unos 48 cm de largo", curiosidad: "Es un ave muy sociable y ruidosa. Su nombre 'pijije' imita su característico silbido. Se le puede ver posado en árboles, algo inusual en patos.", modelo: "models/ave1.glb", escala: 3, marcador: "markers/pattern-ave1.patt" },
-      2: { nombre: "🐔 Chachalaca", cientifico: "Ortalis poliocephala", caracteristicas: "Ave grande, de cola larga y cuerpo redondeado, similar a un faisán. Plumaje pardo oliváceo con vientre más claro y puntas blancas en la cola.", envergadura: "Tamaño similar a un faisán", curiosidad: "Es casi siempre escuchada antes de ser vista, ya que sus llamadas son un ruidoso y rítmico 'chacar-rac-rac' que retumba en el bosque.", modelo: "models/ave2.glb", escala: 3, marcador: "markers/pattern-ave2.patt" },
-      3: { nombre: "🐦 Garza Tigre Mexicana", cientifico: "Tigrisoma mexicanum", caracteristicas: "Garza de aspecto primitivo y patas cortas. El adulto tiene el plumaje finamente barrado (rayado) que le da su nombre, y la garganta desnuda de color amarillo.", envergadura: "Es una garza grande, de patas cortas", curiosidad: "Es un ave solitaria y de hábitos reservados. Prefiere cazar pacientemente en manglares y humedales, alimentándose de peces, ranas y cangrejos.", modelo: "models/ave3.glb", escala: 3, marcador: "markers/pattern-ave3.patt" },
-      4: { nombre: "🐤 Benteveo Común", cientifico: "Pitangus sulphuratus", caracteristicas: "Cabeza negra con dos franjas blancas a modo de cejas y pecho amarillo vivo. Es un ave de cabeza y pico grandes para su tamaño.", envergadura: "Mide entre 21 y 26 cm de largo", curiosidad: "Su nombre proviene de su canto, que suena como 'bien-te-veo'. Es un ave muy territorial y oportunista, que come casi de todo.", modelo: "models/ave4.glb", escala: 3, marcador: "markers/pattern-ave4.patt" }
+      1: {
+        nombre: "🦆 Pijije Aliblanco",
+        cientifico: "Dendrocygna autumnalis",
+        caracteristicas: "Pato mediano con pico y patas de color rosa coral. Espalda castaña rojiza y alas negras con una gran mancha blanca muy visible en vuelo.",
+        envergadura: "Mide unos 48 cm de largo",
+        curiosidad: "Es un ave muy sociable y ruidosa. Su nombre 'pijije' imita su característico silbido. Se le puede ver posado en árboles, algo inusual en patos.",
+        modelo: "models/ave1.glb",
+        escala: 5.0,   // <<--- Escala inicial grande
+        marcador: "markers/pattern-ave1.patt"
+      },
+      2: {
+        nombre: "🐔 Chachalaca",
+        cientifico: "Ortalis poliocephala",
+        caracteristicas: "Ave grande, de cola larga y cuerpo redondeado, similar a un faisán. Plumaje pardo oliváceo con vientre más claro y puntas blancas en la cola.",
+        envergadura: "Tamaño similar a un faisán",
+        curiosidad: "Es casi siempre escuchada antes de ser vista, ya que sus llamadas son un ruidoso y rítmico 'chacar-rac-rac' que retumba en el bosque.",
+        modelo: "models/ave2.glb",
+        escala: 5.0,
+        marcador: "markers/pattern-ave2.patt"
+      },
+      3: {
+        nombre: "🐦 Garza Tigre Mexicana",
+        cientifico: "Tigrisoma mexicanum",
+        caracteristicas: "Garza de aspecto primitivo y patas cortas. El adulto tiene el plumaje finamente barrado (rayado) que le da su nombre, y la garganta desnuda de color amarillo.",
+        envergadura: "Es una garza grande, de patas cortas",
+        curiosidad: "Es un ave solitaria y de hábitos reservados. Prefiere cazar pacientemente en manglares y humedales, alimentándose de peces, ranas y cangrejos.",
+        modelo: "models/ave3.glb",
+        escala: 5.0,
+        marcador: "markers/pattern-ave3.patt"
+      },
+      4: {
+        nombre: "🐤 Benteveo Común",
+        cientifico: "Pitangus sulphuratus",
+        caracteristicas: "Cabeza negra con dos franjas blancas a modo de cejas y pecho amarillo vivo. Es un ave de cabeza y pico grandes para su tamaño.",
+        envergadura: "Mide entre 21 y 26 cm de largo",
+        curiosidad: "Su nombre proviene de su canto, que suena como 'bien-te-veo'. Es un ave muy territorial y oportunista, que come casi de todo.",
+        modelo: "models/ave4.glb",
+        escala: 5.0,
+        marcador: "markers/pattern-ave4.patt"
+      }
     };
 
+    // ============================================================
+    // 2. OBTENER ID DESDE LA URL
+    // ============================================================
     function getParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
@@ -82,31 +147,39 @@
     if (!avesData[id]) id = 1;
     const ave = avesData[id];
 
-    // Actualizar paneles
+    // ============================================================
+    // 3. ACTUALIZAR PANELES
+    // ============================================================
     document.getElementById('nombre-ave').textContent = ave.nombre;
     document.getElementById('cientifico').textContent = ave.cientifico;
     document.getElementById('caracteristicas').innerHTML = `<strong>Características:</strong> ${ave.caracteristicas}`;
     document.getElementById('envergadura').innerHTML = `<strong>Envergadura / Tamaño:</strong> ${ave.envergadura}`;
     document.getElementById('curiosidad-texto').textContent = ave.curiosidad;
 
+    // ============================================================
+    // 4. CARGAR MODELO Y CONFIGURAR MARCADOR
+    // ============================================================
     const modeloEntity = document.getElementById('modelo-ave');
     const debugEl = document.getElementById('debug');
 
     // Cargar modelo
     modeloEntity.setAttribute('gltf-model', 'url(' + ave.modelo + ')');
-
-    // Escala inicial (3)
-    let escalaActual = 3;
+    
+    // Escala inicial grande (5.0) y permitimos ajuste
+    let escalaActual = ave.escala || 5.0;
     modeloEntity.setAttribute('scale', `${escalaActual} ${escalaActual} ${escalaActual}`);
     document.getElementById('escala-texto').textContent = escalaActual.toFixed(2);
 
-    // Controles de escala
+    // ============================================================
+    // 5. CONTROLES DE ESCALA (límite hasta 20.0)
+    // ============================================================
     document.getElementById('btn-mas').addEventListener('click', () => {
-      escalaActual = Math.min(escalaActual + 0.5, 20);
+      escalaActual = Math.min(escalaActual + 0.5, 20.0);
       modeloEntity.setAttribute('scale', `${escalaActual} ${escalaActual} ${escalaActual}`);
       document.getElementById('escala-texto').textContent = escalaActual.toFixed(2);
       debugEl.textContent = `🔍 Escala: ${escalaActual.toFixed(2)}`;
     });
+
     document.getElementById('btn-menos').addEventListener('click', () => {
       escalaActual = Math.max(escalaActual - 0.5, 0.1);
       modeloEntity.setAttribute('scale', `${escalaActual} ${escalaActual} ${escalaActual}`);
@@ -114,11 +187,14 @@
       debugEl.textContent = `🔍 Escala: ${escalaActual.toFixed(2)}`;
     });
 
-    // Eventos
+    // ============================================================
+    // 6. DETECTAR EVENTOS DE CARGA Y MARCADOR
+    // ============================================================
     modeloEntity.addEventListener('model-loaded', () => {
       debugEl.textContent = '✅ Modelo cargado correctamente';
       debugEl.style.color = '#00ff88';
     });
+
     modeloEntity.addEventListener('model-error', (e) => {
       debugEl.textContent = `❌ Error al cargar el modelo: ${e.detail}`;
       debugEl.style.color = '#ff4444';
@@ -129,10 +205,16 @@
       debugEl.textContent += ' 📷 Cámara activa';
     });
 
-    // ---- CONFIGURAR MARCADOR PERSONALIZADO (descomenta para usar) ----
-    // if (ave.marcador) {
-    //   scene.setAttribute('arjs', `patternUrl: ${ave.marcador}; debugUIEnabled: true; sourceType: webcam;`);
-    // }
+    // Detectar cuando se encuentra el marcador HIRO
+    scene.addEventListener('markerFound', (e) => {
+      debugEl.textContent = '📍 ¡Marcador HIRO detectado!';
+      debugEl.style.color = '#00ff88';
+    });
+
+    scene.addEventListener('markerLost', () => {
+      debugEl.textContent = '⚠️ Marcador perdido';
+      debugEl.style.color = '#ffdd00';
+    });
 
     console.log(`Cargando ave ${id}: ${ave.nombre}`);
   </script>
