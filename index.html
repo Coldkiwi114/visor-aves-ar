@@ -78,7 +78,7 @@
   <!-- Controles de escala -->
   <div id="controles">
     <button id="btn-menos">➖</button>
-    <span id="escala-texto">0.15</span>
+    <span id="escala-texto">1.00</span>
     <button id="btn-mas">➕</button>
   </div>
 
@@ -93,22 +93,22 @@
 
     <!-- MARCADOR 1: Pijije Aliblanco -->
     <a-marker type="pattern" url="./markers/pattern-ave1.patt" id="marker-1">
-      <a-entity id="model-1" gltf-model="./models/ave1.glb" scale="0.15 0.15 0.15" position="0 0 0"></a-entity>
+      <a-entity id="model-1" gltf-model="./models/ave1.glb" scale="1 1 1" position="0 0 0"></a-entity>
     </a-marker>
 
     <!-- MARCADOR 2: Chachalaca -->
     <a-marker type="pattern" url="./markers/pattern-ave2.patt" id="marker-2">
-      <a-entity id="model-2" gltf-model="./models/ave2.glb" scale="0.15 0.15 0.15" position="0 0 0"></a-entity>
+      <a-entity id="model-2" gltf-model="./models/ave2.glb" scale="1 1 1" position="0 0 0"></a-entity>
     </a-marker>
 
     <!-- MARCADOR 3: Garza Tigre Mexicana -->
     <a-marker type="pattern" url="./markers/pattern-ave3.patt" id="marker-3">
-      <a-entity id="model-3" gltf-model="./models/ave3.glb" scale="0.15 0.15 0.15" position="0 0 0"></a-entity>
+      <a-entity id="model-3" gltf-model="./models/ave3.glb" scale="1 1 1" position="0 0 0"></a-entity>
     </a-marker>
 
     <!-- MARCADOR 4: Benteveo Común -->
     <a-marker type="pattern" url="./markers/pattern-ave4.patt" id="marker-4">
-      <a-entity id="model-4" gltf-model="./models/ave4.glb" scale="0.15 0.15 0.15" position="0 0 0"></a-entity>
+      <a-entity id="model-4" gltf-model="./models/ave4.glb" scale="1 1 1" position="0 0 0"></a-entity>
     </a-marker>
 
   </a-scene>
@@ -161,6 +161,8 @@
       instruccionEl.innerText = "🔍 Escanea un marcador para desplegar información";
       nombreEl.innerText = "🦜 Esperando marcador...";
       curiosidadEl.innerText = "Enfoca el patrón impreso o digital en pantalla.";
+      // Inicializar el texto de escala con 1.00
+      escalaTextoEl.innerText = "1.00";
     });
 
     function actualizarInterfazAve(id) {
@@ -192,13 +194,13 @@
       }
     });
 
-    // Controles de escala
+    // Controles de escala (incremento/decremento de 0.1 para mayor claridad)
     document.getElementById('btn-mas').addEventListener('click', () => {
       if (!aveActualId) return;
       const modelo = document.getElementById(`model-${aveActualId}`);
       if (modelo) {
         let scale = modelo.getAttribute('scale');
-        let nuevaEscala = scale.x + 0.02;
+        let nuevaEscala = scale.x + 0.1;
         modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
         escalaTextoEl.innerText = nuevaEscala.toFixed(2);
       }
@@ -209,7 +211,7 @@
       const modelo = document.getElementById(`model-${aveActualId}`);
       if (modelo) {
         let scale = modelo.getAttribute('scale');
-        let nuevaEscala = Math.max(0.01, scale.x - 0.02);
+        let nuevaEscala = Math.max(0.1, scale.x - 0.1);
         modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
         escalaTextoEl.innerText = nuevaEscala.toFixed(2);
       }
