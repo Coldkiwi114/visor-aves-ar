@@ -4,180 +4,26 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Visor AR - Aves de México</title>
-  <!-- VERSIONES ESTABLES: A-Frame 1.3.0 + AR.js -->
+
+  <!-- LIBRERÍAS (A-Frame + AR.js) -->
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-  <style>
-    body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-    #titulo {
-      position: absolute; top: 20px; left: 0; right: 0; text-align: center;
-      color: white; font-size: 1.4rem; font-weight: 700;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.9);
-      background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
-      padding: 12px 20px; width: fit-content; margin: 0 auto;
-      border-radius: 40px; border: 1px solid rgba(255,215,0,0.3);
-      z-index: 20; pointer-events: none; max-width: 90%;
-    }
-    #titulo .destacar { color: #ffd700; }
 
-    #info-panel {
-      position: absolute; bottom: 70px; left: 20px; right: 20px;
-      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
-      color: white; padding: 20px 25px; border-radius: 16px;
-      text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,255,255,0.15);
-      pointer-events: none; z-index: 10; max-width: 500px; margin: 0 auto;
-      transition: opacity 0.3s ease;
-    }
-    #info-panel h2 { margin: 0 0 8px 0; font-size: 1.6rem; font-weight: 700; color: #ffd700; }
-    #info-panel p { margin: 5px 0; font-size: 1rem; line-height: 1.5; opacity: 0.9; }
-    #info-panel .cientifico { font-style: italic; color: #aaddff; font-size: 0.9rem; }
-    #info-panel .mensaje-inicial {
-      font-size: 1.1rem;
-      color: #cccccc;
-    }
-
-    #curiosidad-panel {
-      position: absolute; top: 90px; right: 20px;
-      background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
-      color: #fff; padding: 15px 20px; border-radius: 12px;
-      max-width: 260px; font-size: 0.95rem; line-height: 1.4;
-      border-left: 5px solid #ffd700; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-      pointer-events: none; z-index: 10; text-align: left;
-      transition: opacity 0.3s ease;
-    }
-    #curiosidad-panel strong { color: #ffd700; display: block; margin-bottom: 5px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
-
-    #instruccion {
-      position: absolute; bottom: 15px; left: 0; right: 0; text-align: center;
-      color: rgba(255,255,255,0.8); font-size: 0.95rem;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.9); pointer-events: none; z-index: 10;
-      background: rgba(0,0,0,0.25); backdrop-filter: blur(4px);
-      padding: 6px 16px; width: fit-content; margin: 0 auto; border-radius: 30px;
-    }
-
-    #controles {
-      position: absolute;
-      top: 80px;
-      left: 20px;
-      z-index: 40;
-      display: flex;
-      gap: 10px;
-      background: rgba(0,0,0,0.7);
-      padding: 8px 14px;
-      border-radius: 40px;
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.2);
-      pointer-events: auto;
-    }
-    #controles button {
-      background: #ffd700;
-      border: none;
-      color: black;
-      font-size: 1.5rem;
-      font-weight: bold;
-      padding: 4px 14px;
-      border-radius: 30px;
-      cursor: pointer;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      transition: transform 0.1s;
-      pointer-events: auto;
-    }
-    #controles button:active { transform: scale(0.9); }
-    #controles span {
-      color: white;
-      font-size: 1rem;
-      align-self: center;
-      padding: 0 8px;
-      min-width: 50px;
-      text-align: center;
-    }
-
-    @media (max-width: 600px) {
-      #titulo { font-size: 1.0rem; padding: 10px 16px; top: 12px; }
-      #curiosidad-panel { top: 80px; right: 10px; max-width: 170px; padding: 12px 14px; font-size: 0.8rem; }
-      #info-panel { padding: 15px 18px; bottom: 65px; left: 10px; right: 10px; }
-      #info-panel h2 { font-size: 1.2rem; }
-      #info-panel p { font-size: 0.85rem; }
-      #instruccion { font-size: 0.8rem; bottom: 10px; padding: 4px 12px; }
-      #controles { top: 70px; left: 10px; padding: 6px 10px; gap: 5px; }
-      #controles button { font-size: 1.2rem; padding: 4px 10px; }
-      #controles span { font-size: 0.8rem; min-width: 40px; }
-    }
-  </style>
-</head>
-<body>
-  <div id="titulo"><span class="destacar">"Ecos del Cielo"</span> 🌿<br>Aves de Emiliano Zapata en Realidad Aumentada</div>
-  
-  <div id="curiosidad-panel">
-    <strong>✨ Curiosidad</strong>
-    <span id="curiosidad-texto" class="mensaje-inicial">🔎 Escanea un marcador para descubrir datos curiosos</span>
-  </div>
-
-  <div id="info-panel">
-    <h2 id="nombre-ave">🦜 Escanea un marcador</h2>
-    <p><strong>Nombre científico:</strong> <span id="cientifico" class="cientifico">---</span></p>
-    <p id="caracteristicas"><strong>Características:</strong> <span class="mensaje-inicial">Apunta tu cámara a un marcador para conocer al ave</span></p>
-    <p id="envergadura"><strong>Envergadura / Tamaño:</strong> <span class="mensaje-inicial">---</span></p>
-  </div>
-
-  <div id="instruccion">🔍 Apunta la cámara al marcador y arrastra para girar el ave</div>
-
-  <!-- Controles de escala -->
-  <div id="controles">
-    <button id="btn-menos">➖</button>
-    <span id="escala-texto">2.00</span>
-    <button id="btn-mas">➕</button>
-  </div>
-
-  <!-- ESCENA AR -->
-  <a-scene embedded arjs="debugUIEnabled: false; sourceType: webcam; patternRatio: 0.50;" renderer="logarithmicDepthBuffer: true; precision: medium;">
-    
-    <!-- Luces -->
-    <a-light type="ambient" color="#ffffff" intensity="0.7"></a-light>
-    <a-light type="directional" color="#ffffff" intensity="0.9" position="1 2 1"></a-light>
-    <a-light type="directional" color="#ffffff" intensity="0.6" position="-1 0.5 -1"></a-light>
-    <a-light type="hemisphere" color="#ffffff" ground-color="#444444" intensity="0.5"></a-light>
-
-    <!-- MARCADORES CON EL ATRIBUTO marker-handler -->
-    <a-marker type="pattern" url="./markers/pattern-ave1.patt" id="marker-1" marker-handler>
-      <a-entity id="container-1" rotation="-90 0 0" position="0 0.1 0">
-        <a-entity id="model-1" gltf-model="./models/ave1.glb" scale="2 2 2"></a-entity>
-      </a-entity>
-    </a-marker>
-
-    <a-marker type="pattern" url="./markers/pattern-ave2.patt" id="marker-2" marker-handler>
-      <a-entity id="container-2" rotation="-90 0 0" position="0 0.1 0">
-        <a-entity id="model-2" gltf-model="./models/ave2.glb" scale="2 2 2"></a-entity>
-      </a-entity>
-    </a-marker>
-
-    <a-marker type="pattern" url="./markers/pattern-ave3.patt" id="marker-3" marker-handler>
-      <a-entity id="container-3" rotation="-90 0 0" position="0 0.1 0">
-        <a-entity id="model-3" gltf-model="./models/ave3.glb" scale="2 2 2"></a-entity>
-      </a-entity>
-    </a-marker>
-
-    <a-marker type="pattern" url="./markers/pattern-ave4.patt" id="marker-4" marker-handler>
-      <a-entity id="container-4" rotation="-90 0 0" position="0 0.1 0">
-        <a-entity id="model-4" gltf-model="./models/ave4.glb" scale="2 2 2"></a-entity>
-      </a-entity>
-    </a-marker>
-
-  </a-scene>
-
+  <!-- 1. REGISTRO DE COMPONENTES A-FRAME (DEBEN IR EN EL HEAD O ANTES DE A-SCENE) -->
   <script>
-    // ========== Componente de detección de Marcadores (AR.js / A-Frame) ==========
+    // Componente para detectar cuándo entra en vista un marcador
     AFRAME.registerComponent('marker-handler', {
       init: function () {
         this.el.addEventListener('markerFound', () => {
           const id = this.el.id.replace('marker-', '');
-          actualizarInterfazAve(id);
+          if (window.actualizarInterfazAve) {
+            window.actualizarInterfazAve(id);
+          }
         });
       }
     });
 
-    // ========== Componente de rotación con arrastre ==========
+    // Componente para rotar los modelos al arrastrar con el dedo o mouse
     AFRAME.registerComponent('rotation-drag', {
       schema: { sensitivity: { default: 0.5 } },
       init: function () {
@@ -250,8 +96,147 @@
       },
       onMouseUp: function () { this.isDragging = false; }
     });
+  </script>
 
-    // ========== Datos de las aves ==========
+  <style>
+    body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+    #titulo {
+      position: absolute; top: 20px; left: 0; right: 0; text-align: center;
+      color: white; font-size: 1.4rem; font-weight: 700;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.9);
+      background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+      padding: 12px 20px; width: fit-content; margin: 0 auto;
+      border-radius: 40px; border: 1px solid rgba(255,215,0,0.3);
+      z-index: 20; pointer-events: none; max-width: 90%;
+    }
+    #titulo .destacar { color: #ffd700; }
+
+    #info-panel {
+      position: absolute; bottom: 70px; left: 20px; right: 20px;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+      color: white; padding: 20px 25px; border-radius: 16px;
+      text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.15);
+      pointer-events: none; z-index: 10; max-width: 500px; margin: 0 auto;
+      transition: opacity 0.3s ease;
+    }
+    #info-panel h2 { margin: 0 0 8px 0; font-size: 1.6rem; font-weight: 700; color: #ffd700; }
+    #info-panel p { margin: 5px 0; font-size: 1rem; line-height: 1.5; opacity: 0.9; }
+    #info-panel .cientifico { font-style: italic; color: #aaddff; font-size: 0.9rem; }
+    #info-panel .mensaje-inicial { font-size: 1.1rem; color: #cccccc; }
+
+    #curiosidad-panel {
+      position: absolute; top: 90px; right: 20px;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+      color: #fff; padding: 15px 20px; border-radius: 12px;
+      max-width: 260px; font-size: 0.95rem; line-height: 1.4;
+      border-left: 5px solid #ffd700; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      pointer-events: none; z-index: 10; text-align: left;
+      transition: opacity 0.3s ease;
+    }
+    #curiosidad-panel strong { color: #ffd700; display: block; margin-bottom: 5px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+
+    #instruccion {
+      position: absolute; bottom: 15px; left: 0; right: 0; text-align: center;
+      color: rgba(255,255,255,0.8); font-size: 0.95rem;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.9); pointer-events: none; z-index: 10;
+      background: rgba(0,0,0,0.25); backdrop-filter: blur(4px);
+      padding: 6px 16px; width: fit-content; margin: 0 auto; border-radius: 30px;
+    }
+
+    #controles {
+      position: absolute; top: 80px; left: 20px; z-index: 40;
+      display: flex; gap: 10px; background: rgba(0,0,0,0.7);
+      padding: 8px 14px; border-radius: 40px; backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.2); pointer-events: auto;
+    }
+    #controles button {
+      background: #ffd700; border: none; color: black; font-size: 1.5rem;
+      font-weight: bold; padding: 4px 14px; border-radius: 30px; cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3); transition: transform 0.1s; pointer-events: auto;
+    }
+    #controles button:active { transform: scale(0.9); }
+    #controles span {
+      color: white; font-size: 1rem; align-self: center; padding: 0 8px;
+      min-width: 50px; text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      #titulo { font-size: 1.0rem; padding: 10px 16px; top: 12px; }
+      #curiosidad-panel { top: 80px; right: 10px; max-width: 170px; padding: 12px 14px; font-size: 0.8rem; }
+      #info-panel { padding: 15px 18px; bottom: 65px; left: 10px; right: 10px; }
+      #info-panel h2 { font-size: 1.2rem; }
+      #info-panel p { font-size: 0.85rem; }
+      #instruccion { font-size: 0.8rem; bottom: 10px; padding: 4px 12px; }
+      #controles { top: 70px; left: 10px; padding: 6px 10px; gap: 5px; }
+      #controles button { font-size: 1.2rem; padding: 4px 10px; }
+      #controles span { font-size: 0.8rem; min-width: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="titulo"><span class="destacar">"Ecos del Cielo"</span> 🌿<br>Aves de Emiliano Zapata en Realidad Aumentada</div>
+  
+  <div id="curiosidad-panel">
+    <strong>✨ Curiosidad</strong>
+    <span id="curiosidad-texto" class="mensaje-inicial">🔎 Escanea un marcador para descubrir datos curiosos</span>
+  </div>
+
+  <div id="info-panel">
+    <h2 id="nombre-ave">🦜 Escanea un marcador</h2>
+    <p><strong>Nombre científico:</strong> <span id="cientifico" class="cientifico">---</span></p>
+    <p id="caracteristicas"><strong>Características:</strong> <span class="mensaje-inicial">Apunta tu cámara a un marcador para conocer al ave</span></p>
+    <p id="envergadura"><strong>Envergadura / Tamaño:</strong> <span class="mensaje-inicial">---</span></p>
+  </div>
+
+  <div id="instruccion">🔍 Apunta la cámara al marcador y arrastra para girar el ave</div>
+
+  <!-- Controles de escala -->
+  <div id="controles">
+    <button id="btn-menos">➖</button>
+    <span id="escala-texto">2.00</span>
+    <button id="btn-mas">➕</button>
+  </div>
+
+  <!-- ESCENA AR -->
+  <a-scene embedded arjs="debugUIEnabled: false; sourceType: webcam; patternRatio: 0.50;" renderer="logarithmicDepthBuffer: true; precision: medium;">
+    
+    <!-- Luces -->
+    <a-light type="ambient" color="#ffffff" intensity="0.7"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="0.9" position="1 2 1"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="0.6" position="-1 0.5 -1"></a-light>
+    <a-light type="hemisphere" color="#ffffff" ground-color="#444444" intensity="0.5"></a-light>
+
+    <!-- MARCADORES (Con atributo marker-handler) -->
+    <a-marker type="pattern" url="./markers/pattern-ave1.patt" id="marker-1" marker-handler>
+      <a-entity id="container-1" rotation="-90 0 0" position="0 0.1 0">
+        <a-entity id="model-1" gltf-model="./models/ave1.glb" scale="2 2 2"></a-entity>
+      </a-entity>
+    </a-marker>
+
+    <a-marker type="pattern" url="./markers/pattern-ave2.patt" id="marker-2" marker-handler>
+      <a-entity id="container-2" rotation="-90 0 0" position="0 0.1 0">
+        <a-entity id="model-2" gltf-model="./models/ave2.glb" scale="2 2 2"></a-entity>
+      </a-entity>
+    </a-marker>
+
+    <a-marker type="pattern" url="./markers/pattern-ave3.patt" id="marker-3" marker-handler>
+      <a-entity id="container-3" rotation="-90 0 0" position="0 0.1 0">
+        <a-entity id="model-3" gltf-model="./models/ave3.glb" scale="2 2 2"></a-entity>
+      </a-entity>
+    </a-marker>
+
+    <a-marker type="pattern" url="./markers/pattern-ave4.patt" id="marker-4" marker-handler>
+      <a-entity id="container-4" rotation="-90 0 0" position="0 0.1 0">
+        <a-entity id="model-4" gltf-model="./models/ave4.glb" scale="2 2 2"></a-entity>
+      </a-entity>
+    </a-marker>
+
+  </a-scene>
+
+  <!-- 2. LÓGICA DE INTERFAZ Y MANEJO DEL DOM -->
+  <script>
+    // Base de datos de aves
     const avesData = {
       1: {
         nombre: "🦆 Pijije Aliblanco",
@@ -283,7 +268,6 @@
       }
     };
 
-    // ========== Elementos del DOM ==========
     const nombreEl = document.getElementById('nombre-ave');
     const cientificoEl = document.getElementById('cientifico');
     const caracteristicasEl = document.getElementById('caracteristicas');
@@ -293,7 +277,7 @@
 
     let aveActualId = null;
 
-    // ========== Actualizar escala en pantalla leyendo 3D directo ==========
+    // Actualiza el indicador de texto de la escala
     function actualizarEscalaMostrada() {
       if (!aveActualId) return;
       const modelo = document.getElementById(`model-${aveActualId}`);
@@ -302,13 +286,13 @@
       }
     }
 
-    // ========== Actualizar interfaz al encontrar un ave ==========
-    function actualizarInterfazAve(id) {
+    // Función invocada desde el componente 'marker-handler' cuando un marcador entra a la cámara
+    window.actualizarInterfazAve = function(id) {
       aveActualId = id;
       const ave = avesData[id];
       if (!ave) return;
 
-      // Actualizar información
+      // Actualizar interfaz HTML
       nombreEl.innerText = ave.nombre;
       cientificoEl.innerText = ave.cientifico;
       caracteristicasEl.innerHTML = `<strong>Características:</strong> ${ave.caracteristicas}`;
@@ -316,16 +300,16 @@
       curiosidadEl.innerText = ave.curiosidad;
       curiosidadEl.className = '';
 
-      // Agregar componente de rotación si no lo tiene
+      // Asignar rotación
       const container = document.getElementById(`container-${id}`);
       if (container && !container.components['rotation-drag']) {
         container.setAttribute('rotation-drag', '');
       }
 
       actualizarEscalaMostrada();
-    }
+    };
 
-    // ========== Controles de escala ==========
+    // Botón Aumentar Escala (+)
     document.getElementById('btn-mas').addEventListener('click', () => {
       if (!aveActualId) return;
       const modelo = document.getElementById(`model-${aveActualId}`);
@@ -337,6 +321,7 @@
       }
     });
 
+    // Botón Disminuir Escala (-)
     document.getElementById('btn-menos').addEventListener('click', () => {
       if (!aveActualId) return;
       const modelo = document.getElementById(`model-${aveActualId}`);
