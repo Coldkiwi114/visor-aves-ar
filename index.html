@@ -22,7 +22,7 @@
 
     #controles {
       position: absolute;
-      bottom: 120px;
+      bottom: 180px;  /* Movido más abajo para no tapar el título */
       left: 20px;
       z-index: 40;
       display: flex;
@@ -57,7 +57,7 @@
       #info-panel p { font-size: 0.85rem; }
       #instruccion { font-size: 0.8rem; bottom: 10px; padding: 4px 12px; }
       #debug { top: 100px; left: 10px; font-size: 0.8rem; padding: 6px 10px; }
-      #controles { bottom: 100px; left: 10px; padding: 8px 12px; gap: 5px; }
+      #controles { bottom: 140px; left: 10px; padding: 8px 12px; gap: 5px; }
       #controles button { font-size: 1.2rem; padding: 5px 12px; }
       #controles span { font-size: 0.8rem; min-width: 40px; }
     }
@@ -72,7 +72,7 @@
     <p id="caracteristicas"><strong>Características:</strong> ---</p>
     <p id="envergadura"><strong>Envergadura / Tamaño:</strong> ---</p>
   </div>
-  <div id="instruccion">🔍 Apunta la cámara al marcador de un ave</div>
+  <div id="instruccion">🔍 Apunta la cámara al marcador (arrastra para rotar el modelo)</div>
   <div id="debug">⏳ Inicializando...</div>
 
   <!-- Controles de escala -->
@@ -93,27 +93,119 @@
 
     <!-- MARCADOR 1: Pijije Aliblanco -->
     <a-marker type="pattern" url="./markers/pattern-ave1.patt" id="marker-1">
-      <a-entity id="model-1" gltf-model="./models/ave1.glb" scale="1 1 1" position="0 0 0"></a-entity>
+      <!-- Contenedor del modelo con rotación táctil y posición elevada -->
+      <a-entity id="model-container-1" position="0 0.15 0" rotation="-15 0 0">
+        <a-entity id="model-1" gltf-model="./models/ave1.glb" scale="1 1 1" position="0 0 0"
+                  touch-rotate></a-entity>
+      </a-entity>
     </a-marker>
 
     <!-- MARCADOR 2: Chachalaca -->
     <a-marker type="pattern" url="./markers/pattern-ave2.patt" id="marker-2">
-      <a-entity id="model-2" gltf-model="./models/ave2.glb" scale="1 1 1" position="0 0 0"></a-entity>
+      <a-entity id="model-container-2" position="0 0.15 0" rotation="-15 0 0">
+        <a-entity id="model-2" gltf-model="./models/ave2.glb" scale="1 1 1" position="0 0 0"
+                  touch-rotate></a-entity>
+      </a-entity>
     </a-marker>
 
     <!-- MARCADOR 3: Garza Tigre Mexicana -->
     <a-marker type="pattern" url="./markers/pattern-ave3.patt" id="marker-3">
-      <a-entity id="model-3" gltf-model="./models/ave3.glb" scale="1 1 1" position="0 0 0"></a-entity>
+      <a-entity id="model-container-3" position="0 0.15 0" rotation="-15 0 0">
+        <a-entity id="model-3" gltf-model="./models/ave3.glb" scale="1 1 1" position="0 0 0"
+                  touch-rotate></a-entity>
+      </a-entity>
     </a-marker>
 
     <!-- MARCADOR 4: Benteveo Común -->
     <a-marker type="pattern" url="./markers/pattern-ave4.patt" id="marker-4">
-      <a-entity id="model-4" gltf-model="./models/ave4.glb" scale="1 1 1" position="0 0 0"></a-entity>
+      <a-entity id="model-container-4" position="0 0.15 0" rotation="-15 0 0">
+        <a-entity id="model-4" gltf-model="./models/ave4.glb" scale="1 1 1" position="0 0 0"
+                  touch-rotate></a-entity>
+      </a-entity>
     </a-marker>
 
   </a-scene>
 
   <script>
+    // ===== COMPONENTE PERSONALIZADO PARA ROTACIÓN CON TACTIL =====
+    AFRAME.registerComponent('touch-rotate', {
+      schema: {
+        sensitivity: { default: 0.5 }
+      },
+
+      init: function () {
+        this.rotationY = 0;
+        this.rotationX = 0;
+        this.isDragging = false;
+        this.prevX = 0;
+        this.prevY = 0;
+
+        // Referencia al modelo (el propio entity)
+        this.el = this.el;
+
+        // Eventos táctiles
+        this.el.addEventListener('touchstart', this.onTouchStart.bind(this));
+        this.el.addEventListener('touchmove', this.onTouchMove.bind(this));
+        this.el.addEventListener('touchend', this.onTouchEnd.bind(this));
+        // Soporte para ratón (para pruebas en escritorio)
+        this.el.addEventListener('mousedown', this.onMouseDown.bind(this));
+        window.addEventListener('mousemove', this.onMouseMove.bind(this));
+        window.addEventListener('mouseup', this.onMouseUp.bind(this));
+      },
+
+      onTouchStart: function (e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        this.isDragging = true;
+        this.prevX = touch.clientX;
+        this.prevY = touch.clientY;
+      },
+
+      onTouchMove: function (e) {
+        e.preventDefault();
+        if (!this.isDragging) return;
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - this.prevX;
+        const deltaY = touch.clientY - this.prevY;
+        this.rotationY += deltaX * this.data.sensitivity * 0.01;
+        this.rotationX += deltaY * this.data.sensitivity * 0.01;
+        // Limitar la rotación en X para no dar la vuelta
+        this.rotationX = Math.max(-90, Math.min(90, this.rotationX));
+        this.el.setAttribute('rotation', `${this.rotationX} ${this.rotationY} 0`);
+        this.prevX = touch.clientX;
+        this.prevY = touch.clientY;
+      },
+
+      onTouchEnd: function (e) {
+        this.isDragging = false;
+      },
+
+      // Soporte para ratón (escritorio)
+      onMouseDown: function (e) {
+        e.preventDefault();
+        this.isDragging = true;
+        this.prevX = e.clientX;
+        this.prevY = e.clientY;
+      },
+
+      onMouseMove: function (e) {
+        if (!this.isDragging) return;
+        const deltaX = e.clientX - this.prevX;
+        const deltaY = e.clientY - this.prevY;
+        this.rotationY += deltaX * this.data.sensitivity * 0.01;
+        this.rotationX += deltaY * this.data.sensitivity * 0.01;
+        this.rotationX = Math.max(-90, Math.min(90, this.rotationX));
+        this.el.setAttribute('rotation', `${this.rotationX} ${this.rotationY} 0`);
+        this.prevX = e.clientX;
+        this.prevY = e.clientY;
+      },
+
+      onMouseUp: function () {
+        this.isDragging = false;
+      }
+    });
+
+    // ===== DATOS DE LAS AVES =====
     const avesData = {
       1: {
         nombre: "🦆 Pijije Aliblanco",
@@ -158,10 +250,9 @@
 
     window.addEventListener('load', () => {
       debugEl.innerText = "🚀 Sistema AR Activo";
-      instruccionEl.innerText = "🔍 Escanea un marcador para desplegar información";
+      instruccionEl.innerText = "🔍 Escanea un marcador (arrastra para rotar el modelo)";
       nombreEl.innerText = "🦜 Esperando marcador...";
       curiosidadEl.innerText = "Enfoca el patrón impreso o digital en pantalla.";
-      // Inicializar el texto de escala con 1.00
       escalaTextoEl.innerText = "1.00";
     });
 
@@ -194,7 +285,7 @@
       }
     });
 
-    // Controles de escala (incremento/decremento de 0.1 para mayor claridad)
+    // Controles de escala (incremento/decremento de 0.1)
     document.getElementById('btn-mas').addEventListener('click', () => {
       if (!aveActualId) return;
       const modelo = document.getElementById(`model-${aveActualId}`);
