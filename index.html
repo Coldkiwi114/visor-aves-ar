@@ -60,12 +60,10 @@
       padding: 6px 16px; width: fit-content; margin: 0 auto; border-radius: 30px;
     }
 
-    /* Ocultamos el debug para una experiencia más limpia */
     #debug {
       display: none;
     }
 
-    /* CONTROLES DE ESCALA REUBICADOS: debajo del título, a la izquierda */
     #controles {
       position: absolute;
       top: 80px;
@@ -183,16 +181,13 @@
   <script>
     // ========== Componente de rotación con arrastre ==========
     AFRAME.registerComponent('rotation-drag', {
-      schema: {
-        sensitivity: { default: 0.5 }
-      },
+      schema: { sensitivity: { default: 0.5 } },
       init: function () {
         this.rotationX = 0;
         this.rotationY = 0;
         this.isDragging = false;
         this.prevX = 0;
         this.prevY = 0;
-
         this.onTouchStart = this.onTouchStart.bind(this);
         this.onTouchMove = this.onTouchMove.bind(this);
         this.onTouchEnd = this.onTouchEnd.bind(this);
@@ -202,6 +197,7 @@
       },
       play: function () {
         const canvas = document.querySelector('a-scene').canvas;
+        if (!canvas) return;
         canvas.addEventListener('touchstart', this.onTouchStart, { passive: false });
         canvas.addEventListener('touchmove', this.onTouchMove, { passive: false });
         canvas.addEventListener('touchend', this.onTouchEnd);
@@ -211,6 +207,7 @@
       },
       pause: function () {
         const canvas = document.querySelector('a-scene').canvas;
+        if (!canvas) return;
         canvas.removeEventListener('touchstart', this.onTouchStart);
         canvas.removeEventListener('touchmove', this.onTouchMove);
         canvas.removeEventListener('touchend', this.onTouchEnd);
@@ -236,9 +233,7 @@
         this.prevX = e.touches[0].clientX;
         this.prevY = e.touches[0].clientY;
       },
-      onTouchEnd: function () {
-        this.isDragging = false;
-      },
+      onTouchEnd: function () { this.isDragging = false; },
       onMouseDown: function (e) {
         this.isDragging = true;
         this.prevX = e.clientX;
@@ -254,9 +249,7 @@
         this.prevX = e.clientX;
         this.prevY = e.clientY;
       },
-      onMouseUp: function () {
-        this.isDragging = false;
-      }
+      onMouseUp: function () { this.isDragging = false; }
     });
 
     // ========== Datos de las aves ==========
@@ -298,91 +291,153 @@
     const envergaduraEl = document.getElementById('envergadura');
     const curiosidadEl = document.getElementById('curiosidad-texto');
     const escalaTextoEl = document.getElementById('escala-texto');
+    const infoPanel = document.getElementById('info-panel');
 
     let aveActualId = null;
 
     // ========== Función para actualizar la escala mostrada ==========
     function actualizarEscalaMostrada() {
-      if (!aveActualId) return;
+      if (!aveActualId) {
+        escalaTextoEl.innerText = '--';
+        return;
+      }
       const modelo = document.getElementById(`model-${aveActualId}`);
       if (modelo) {
         const scale = modelo.getAttribute('scale');
-        if (scale && scale.x) {
+        if (scale && typeof scale.x === 'number') {
           escalaTextoEl.innerText = scale.x.toFixed(2);
+        } else {
+          // Si el modelo no tiene escala, asignar 2 por defecto
+          modelo.setAttribute('scale', '2 2 2');
+          escalaTextoEl.innerText = '2.00';
         }
       }
     }
 
     // ========== Actualizar interfaz al encontrar un ave ==========
     function actualizarInterfazAve(id) {
-      aveActualId = id;
-      const ave = avesData[id];
-      if (!ave) return;
-
-      // Actualizar información
-      nombreEl.innerText = ave.nombre;
-      cientificoEl.innerText = ave.cientifico;
-      caracteristicasEl.innerHTML = `<strong>Características:</strong> ${ave.caracteristicas}`;
-      envergaduraEl.innerHTML = `<strong>Envergadura / Tamaño:</strong> ${ave.envergadura}`;
-      curiosidadEl.innerText = ave.curiosidad;
-      // Quitar la clase de mensaje inicial si la tuviera
-      curiosidadEl.className = '';
-      caracteristicasEl.querySelector('.mensaje-inicial')?.remove();
-
-      // Actualizar la escala mostrada
-      setTimeout(actualizarEscalaMostrada, 400);
-
-      // Agregar el componente de rotación al contenedor si no lo tiene
-      const container = document.getElementById(`container-${id}`);
-      if (container && !container.components['rotation-drag']) {
-        container.setAttribute('rotation-drag', '');
-      }
-
-      // Escuchar evento 'model-loaded' para actualizar la escala
-      const modelo = document.getElementById(`model-${id}`);
-      if (modelo) {
-        modelo.addEventListener('model-loaded', () => {
-          actualizarEscalaMostrada();
-        });
-        if (modelo.getAttribute('gltf-model')?.loaded) {
-          actualizarEscalaMostrada();
+      try {
+        console.log(`🟢 Marcador detectado: ${id}`);
+        aveActualId = id;
+        const ave = avesData[id];
+        if (!ave) {
+          console.warn(`No hay datos para el ave ${id}`);
+          return;
         }
+
+        // Actualizar información
+        nombreEl.innerText = ave.nombre;
+        cientificoEl.innerText = ave.cientifico;
+        caracteristicasEl.innerHTML = `<strong>Características:</strong> ${ave.caracteristicas}`;
+        envergaduraEl.innerHTML = `<strong>Envergadura / Tamaño:</strong> ${ave.envergadura}`;
+        curiosidadEl.innerText = ave.curiosidad;
+        curiosidadEl.className = ''; // quitar clase de mensaje inicial
+
+        // Mostrar un mensaje temporal en el panel para confirmar detección
+        const mensajeDetectado = document.createElement('div');
+        mensajeDetectado.style.cssText = 'color: #ffd700; font-weight: bold; margin-top: 6px;';
+        mensajeDetectado.innerText = '✅ ¡Ave detectada!';
+        const existente = infoPanel.querySelector('.detectado-msg');
+        if (existente) existente.remove();
+        mensajeDetectado.className = 'detectado-msg';
+        infoPanel.appendChild(mensajeDetectado);
+        setTimeout(() => { if (mensajeDetectado.parentNode) mensajeDetectado.remove(); }, 3000);
+
+        // Agregar componente de rotación al contenedor si no existe
+        const container = document.getElementById(`container-${id}`);
+        if (container && !container.components['rotation-drag']) {
+          container.setAttribute('rotation-drag', '');
+        }
+
+        // Esperar a que el modelo esté cargado para actualizar la escala
+        const modelo = document.getElementById(`model-${id}`);
+        if (modelo) {
+          // Si ya está cargado, actualizar ahora
+          if (modelo.getAttribute('gltf-model') && modelo.components['gltf-model']?.data) {
+            actualizarEscalaMostrada();
+          } else {
+            modelo.addEventListener('model-loaded', function onLoad() {
+              actualizarEscalaMostrada();
+              modelo.removeEventListener('model-loaded', onLoad);
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error al actualizar interfaz:', error);
       }
     }
 
-    // ========== Eventos de los marcadores ==========
-    [1, 2, 3, 4].forEach(id => {
-      const marker = document.getElementById(`marker-${id}`);
-      if (marker) {
-        marker.addEventListener('markerFound', () => {
-          actualizarInterfazAve(id);
+    // ========== Inicialización: esperar a que la escena esté lista ==========
+    const scene = document.querySelector('a-scene');
+    if (scene) {
+      scene.addEventListener('loaded', function () {
+        console.log('🚀 Escena AR cargada. Registrando eventos de marcadores...');
+
+        // Registrar eventos para cada marcador
+        [1, 2, 3, 4].forEach(id => {
+          const marker = document.getElementById(`marker-${id}`);
+          if (marker) {
+            // Usar el evento más confiable en AR.js
+            marker.addEventListener('arjs-marker-found', () => {
+              actualizarInterfazAve(id);
+            });
+            // Opcional: también escuchar markerFound por compatibilidad
+            marker.addEventListener('markerFound', () => {
+              actualizarInterfazAve(id);
+            });
+          } else {
+            console.warn(`Marcador marker-${id} no encontrado en el DOM`);
+          }
         });
-        // No es necesario ocultar nada al perder el marcador
-      }
-    });
+
+        // Mostrar mensaje en consola de que los eventos están listos
+        document.getElementById('debug').innerText = '✅ Listo. Escanea un marcador.';
+      });
+    } else {
+      console.error('No se encontró la escena a-scene');
+    }
 
     // ========== Controles de escala ==========
     document.getElementById('btn-mas').addEventListener('click', () => {
-      if (!aveActualId) return;
+      if (!aveActualId) {
+        alert('Primero escanea un marcador para ajustar el tamaño.');
+        return;
+      }
       const modelo = document.getElementById(`model-${aveActualId}`);
       if (modelo) {
         let scale = modelo.getAttribute('scale');
-        let nuevaEscala = scale.x + 0.2;
+        let nuevaEscala = (scale && typeof scale.x === 'number') ? scale.x + 0.2 : 2.2;
         modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
         escalaTextoEl.innerText = nuevaEscala.toFixed(2);
       }
     });
 
     document.getElementById('btn-menos').addEventListener('click', () => {
-      if (!aveActualId) return;
+      if (!aveActualId) {
+        alert('Primero escanea un marcador para ajustar el tamaño.');
+        return;
+      }
       const modelo = document.getElementById(`model-${aveActualId}`);
       if (modelo) {
         let scale = modelo.getAttribute('scale');
-        let nuevaEscala = Math.max(0.2, scale.x - 0.2);
+        let actual = (scale && typeof scale.x === 'number') ? scale.x : 2;
+        let nuevaEscala = Math.max(0.2, actual - 0.2);
         modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
         escalaTextoEl.innerText = nuevaEscala.toFixed(2);
       }
     });
+
+    // ========== Actualizar la escala al cargar la página (por si ya hay un marcador visible) ==========
+    setTimeout(() => {
+      // Si algún marcador ya está detectado, el evento se disparará al registrarse
+      // Pero por si acaso, forzamos una comprobación después de 2 segundos
+      [1, 2, 3, 4].forEach(id => {
+        const marker = document.getElementById(`marker-${id}`);
+        if (marker && marker.getAttribute('visible') === 'true') {
+          actualizarInterfazAve(id);
+        }
+      });
+    }, 2000);
   </script>
 </body>
 </html>
