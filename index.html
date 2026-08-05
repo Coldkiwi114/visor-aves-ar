@@ -1,18 +1,215 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AR.js Prueba Mínima</title>
-  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.min.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Visor AR - Aves de México</title>
+  <!-- SOLUCIÓN DE VERSIONES: A-Frame 1.3.0 + AR.js compatible con marcadores custom -->
+  <script src="https://aframe.io"></script>
+  <script src="https://githack.com"></script>
+  <style>
+    body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+    #titulo { position: absolute; top: 20px; left: 0; right: 0; text-align: center; color: white; font-size: 1.4rem; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,0.9); background: rgba(0,0,0,0.45); backdrop-filter: blur(6px); padding: 12px 20px; width: fit-content; margin: 0 auto; border-radius: 40px; border: 1px solid rgba(255,215,0,0.3); z-index: 20; pointer-events: none; max-width: 90%; }
+    #titulo .destacar { color: #ffd700; }
+    #info-panel { position: absolute; bottom: 70px; left: 20px; right: 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); color: white; padding: 20px 25px; border-radius: 16px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); pointer-events: none; z-index: 10; max-width: 500px; margin: 0 auto; }
+    #info-panel h2 { margin: 0 0 8px 0; font-size: 1.6rem; font-weight: 700; color: #ffd700; }
+    #info-panel p { margin: 5px 0; font-size: 1rem; line-height: 1.5; opacity: 0.9; }
+    #info-panel .cientifico { font-style: italic; color: #aaddff; font-size: 0.9rem; }
+    #curiosidad-panel { position: absolute; top: 90px; right: 20px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); color: #fff; padding: 15px 20px; border-radius: 12px; max-width: 260px; font-size: 0.95rem; line-height: 1.4; border-left: 5px solid #ffd700; box-shadow: 0 4px 20px rgba(0,0,0,0.4); pointer-events: none; z-index: 10; text-align: left; }
+    #curiosidad-panel strong { color: #ffd700; display: block; margin-bottom: 5px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+    #instruccion { position: absolute; bottom: 15px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.8); font-size: 0.95rem; text-shadow: 0 2px 10px rgba(0,0,0,0.9); pointer-events: none; z-index: 10; background: rgba(0,0,0,0.25); backdrop-filter: blur(4px); padding: 6px 16px; width: fit-content; margin: 0 auto; border-radius: 30px; }
+    #debug { position: absolute; top: 120px; left: 20px; background: rgba(0,0,0,0.8); color: #ffdd00; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; max-width: 80%; z-index: 30; pointer-events: none; border: 1px solid #ffdd00; }
+
+    #controles {
+      position: absolute;
+      bottom: 120px;
+      left: 20px;
+      z-index: 40;
+      display: flex;
+      gap: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 15px;
+      border-radius: 50px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    #controles button {
+      background: #ffd700;
+      border: none;
+      color: black;
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 8px 18px;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      transition: transform 0.1s;
+      pointer-events: auto;
+    }
+    #controles button:active { transform: scale(0.9); }
+    #controles span { color: white; font-size: 1rem; align-self: center; padding: 0 10px; min-width: 60px; text-align: center; }
+
+    @media (max-width: 600px) {
+      #titulo { font-size: 1.0rem; padding: 10px 16px; top: 12px; }
+      #curiosidad-panel { top: 80px; right: 10px; max-width: 170px; padding: 12px 14px; font-size: 0.8rem; }
+      #info-panel { padding: 15px 18px; bottom: 65px; left: 10px; right: 10px; }
+      #info-panel h2 { font-size: 1.2rem; }
+      #info-panel p { font-size: 0.85rem; }
+      #instruccion { font-size: 0.8rem; bottom: 10px; padding: 4px 12px; }
+      #debug { top: 100px; left: 10px; font-size: 0.8rem; padding: 6px 10px; }
+      #controles { bottom: 100px; left: 10px; padding: 8px 12px; gap: 5px; }
+      #controles button { font-size: 1.2rem; padding: 5px 12px; }
+      #controles span { font-size: 0.8rem; min-width: 40px; }
+    }
+  </style>
 </head>
 <body>
-  <a-scene embedded arjs="debugUIEnabled: true;">
-    <!-- El cubo rojo aparecerá sobre el marcador HIRO -->
-    <a-marker-camera preset="hiro">
-      <a-box position="0 0.5 0" material="color: red;" scale="0.5 0.5 0.5"></a-box>
-    </a-marker-camera>
+  <div id="titulo"><span class="destacar">"Ecos del Cielo"</span> 🌿<br>Aves de Emiliano Zapata en Realidad Aumentada</div>
+  <div id="curiosidad-panel"><strong>✨ Curiosidad</strong><span id="curiosidad-texto" class="curiosidad-texto">Cargando...</span></div>
+  <div id="info-panel">
+    <h2 id="nombre-ave">🦜 Cargando...</h2>
+    <p><strong>Nombre científico:</strong> <span id="cientifico" class="cientifico">---</span></p>
+    <p id="caracteristicas"><strong>Características:</strong> ---</p>
+    <p id="envergadura"><strong>Envergadura / Tamaño:</strong> ---</p>
+  </div>
+  <div id="instruccion">🔍 Apunta la cámara al marcador de un ave</div>
+  <div id="debug">⏳ Inicializando...</div>
+
+  <!-- Controles de escala -->
+  <div id="controles">
+    <button id="btn-menos">➖</button>
+    <span id="escala-texto">0.15</span>
+    <button id="btn-mas">➕</button>
+  </div>
+
+  <!-- ESCENA AR CORREGIDA: Ajustada la iluminación y desactivado el log innecesario -->
+  <a-scene embedded arjs="debugUIEnabled: false; sourceType: webcam; patternRatio: 0.50;" renderer="logarithmicDepthBuffer: true; precision: medium;">
+    
+    <!-- MARCADOR 1: Pijije Aliblanco -->
+    <a-marker type="pattern" url="./markers/pattern-ave1.patt" id="marker-1">
+      
+    </a-marker>
+
+    <!-- MARCADOR 2: Chachalaca -->
+    <a-marker type="pattern" url="./markers/pattern-ave2.patt" id="marker-2">
+      
+    </a-marker>
+
+    <!-- MARCADOR 3: Garza Tigre Mexicana -->
+    <a-marker type="pattern" url="./markers/pattern-ave3.patt" id="marker-3">
+      
+    </a-marker>
+
+    <!-- MARCADOR 4: Benteveo Común -->
+    <a-marker type="pattern" url="./markers/pattern-ave4.patt" id="marker-4">
+      
+    </a-marker>
+
+    <!-- Entidades básicas de iluminación para evitar modelos oscuros/negros -->
+    
+    
+
+    
   </a-scene>
+
+  <script>
+    const avesData = {
+      1: {
+        nombre: "🦆 Pijije Aliblanco",
+        cientifico: "Dendrocygna autumnalis",
+        caracteristicas: "Pato mediano con pico y patas de color rosa coral. Espalda castaña rojiza y alas negras con una gran mancha blanca muy visible en vuelo.",
+        envergadura: "Mide unos 48 cm de largo",
+        curiosidad: "Es un ave muy sociable y ruidosa. Su nombre 'pijije' imita su característico silbido. Se le puede ver posado en árboles, algo inusual en patos."
+      },
+      2: {
+        nombre: "🐔 Chachalaca",
+        cientifico: "Ortalis poliocephala",
+        caracteristicas: "Ave grande, de cola larga y cuerpo redondeado, similar a un faisán. Plumaje pardo oliváceo con vientre más claro y puntas blancas en la cola.",
+        envergadura: "Tamaño similar a un faisán",
+        curiosidad: "Es casi siempre escuchada antes de ser vista, ya que sus llamadas son un ruidoso y rítmico 'chacar-rac-rac' que retumba en el bosque."
+      },
+      3: {
+        nombre: "🐦 Garza Tigre Mexicana",
+        cientifico: "Tigrisoma mexicanum",
+        caracteristicas: "Garza de aspecto primitivo y patas cortas. El adulto tiene el plumaje finamente barrado (rayado) que le da su nombre, y la garganta desnuda de color amarillo.",
+        envergadura: "Es una garza grande, de patas cortas",
+        curiosidad: "Es un ave solitaria y de hábitos reservados. Prefiere cazar pacientemente en manglares y humedales, alimentándose de peces, ranas y cangrejos."
+      },
+      4: {
+        nombre: "🐤 Benteveo Común",
+        cientifico: "Pitangus sulphuratus",
+        caracteristicas: "Cabeza negra con dos franjas blancas a modo de cejas y pecho amarillo vivo. Es un ave de cabeza y pico grandes para su tamaño.",
+        envergadura: "Mide entre 21 y 26 cm de largo",
+        curiosidad: "Su nombre proviene de su canto, que suena como 'bien-te-veo'. Es un ave muy territorial y oportunista, que come casi de todo."
+      }
+    };
+
+    const debugEl = document.getElementById('debug');
+    const instruccionEl = document.getElementById('instruccion');
+    const nombreEl = document.getElementById('nombre-ave');
+    const cientificoEl = document.getElementById('cientifico');
+    const caracteristicasEl = document.getElementById('caracteristicas');
+    const envergaduraEl = document.getElementById('envergadura');
+    const curiosidadEl = document.getElementById('curiosidad-texto');
+    const escalaTextoEl = document.getElementById('escala-texto');
+
+    let aveActualId = null;
+
+    window.addEventListener('load', () => {
+      debugEl.innerText = "🚀 Sistema AR Activo";
+      instruccionEl.innerText = "🔍 Escanea un marcador para desplegar información";
+      nombreEl.innerText = "🦜 Esperando marcador...";
+      curiosidadEl.innerText = "Enfoca el patrón impreso o digital en pantalla.";
+    });
+
+    function actualizarInterfazAve(id) {
+      aveActualId = id;
+      const ave = avesData[id];
+      nombreEl.innerText = ave.nombre;
+      cientificoEl.innerText = ave.cientifico;
+
+caracteristicasEl.innerHTML = <strong>Características:</strong> ${ave.caracteristicas};
+envergaduraEl.innerHTML = <strong>Envergadura / Tamaño:</strong> ${ave.envergadura};
+curiosidadEl.innerText = ave.curiosidad;
+const modelo = document.getElementById(ave-${id});
+if (modelo) {
+const currentScale = modelo.getAttribute('scale').x;
+escalaTextoEl.innerText = currentScale.toFixed(2);
+}
+}
+// ARREGLADO: Se reincorporó el arreglo de IDs para solucionar el quiebre de sintaxis
+[1, 2, 3, 4].forEach(id => {
+const marker = document.getElementById(marker-${id});
+if (marker) {
+marker.addEventListener('markerFound', () => {
+debugEl.innerText = 🟢 Visualizando Ave #${id};
+actualizarInterfazAve(id);
+});
+marker.addEventListener('markerLost', () => {
+debugEl.innerText = "⏳ Buscando marcador en cámara...";
+});
+}
+});
+document.getElementById('btn-mas').addEventListener('click', () => {
+if (!aveActualId) return;
+const modelo = document.getElementById(ave-${aveActualId});
+if (modelo) {
+let scale = modelo.getAttribute('scale');
+let nuevaEscala = scale.x + 0.02;
+modelo.setAttribute('scale', ${nuevaEscala} ${nuevaEscala} ${nuevaEscala});
+escalaTextoEl.innerText = nuevaEscala.toFixed(2);
+}
+});
+document.getElementById('btn-menos').addEventListener('click', () => {
+if (!aveActualId) return;
+const modelo = document.getElementById(ave-${aveActualId});
+if (modelo) {
+let scale = modelo.getAttribute('scale');
+let nuevaEscala = Math.max(0.01, scale.x - 0.02);
+modelo.setAttribute('scale', ${nuevaEscala} ${nuevaEscala} ${nuevaEscala});
+escalaTextoEl.innerText = nuevaEscala.toFixed(2);
+}
+});
+  </script>
 </body>
 </html>
