@@ -27,10 +27,15 @@
       text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
       border: 1px solid rgba(255,255,255,0.15);
       pointer-events: none; z-index: 10; max-width: 500px; margin: 0 auto;
+      transition: opacity 0.3s ease;
     }
     #info-panel h2 { margin: 0 0 8px 0; font-size: 1.6rem; font-weight: 700; color: #ffd700; }
     #info-panel p { margin: 5px 0; font-size: 1rem; line-height: 1.5; opacity: 0.9; }
     #info-panel .cientifico { font-style: italic; color: #aaddff; font-size: 0.9rem; }
+    #info-panel .mensaje-inicial {
+      font-size: 1.1rem;
+      color: #cccccc;
+    }
 
     #curiosidad-panel {
       position: absolute; top: 90px; right: 20px;
@@ -39,8 +44,13 @@
       max-width: 260px; font-size: 0.95rem; line-height: 1.4;
       border-left: 5px solid #ffd700; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
       pointer-events: none; z-index: 10; text-align: left;
+      transition: opacity 0.3s ease;
     }
     #curiosidad-panel strong { color: #ffd700; display: block; margin-bottom: 5px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+    #curiosidad-panel .mensaje-inicial {
+      color: #aaaaaa;
+      font-size: 0.9rem;
+    }
 
     #instruccion {
       position: absolute; bottom: 15px; left: 0; right: 0; text-align: center;
@@ -50,12 +60,9 @@
       padding: 6px 16px; width: fit-content; margin: 0 auto; border-radius: 30px;
     }
 
+    /* Ocultamos el debug para una experiencia más limpia */
     #debug {
-      position: absolute; top: 120px; left: 20px;
-      background: rgba(0,0,0,0.8); color: #ffdd00;
-      padding: 10px 15px; border-radius: 8px; font-size: 0.9rem;
-      max-width: 80%; z-index: 30; pointer-events: none;
-      border: 1px solid #ffdd00;
+      display: none;
     }
 
     /* CONTROLES DE ESCALA REUBICADOS: debajo del título, a la izquierda */
@@ -103,7 +110,6 @@
       #info-panel h2 { font-size: 1.2rem; }
       #info-panel p { font-size: 0.85rem; }
       #instruccion { font-size: 0.8rem; bottom: 10px; padding: 4px 12px; }
-      #debug { top: 100px; left: 10px; font-size: 0.8rem; padding: 6px 10px; }
       #controles { top: 70px; left: 10px; padding: 6px 10px; gap: 5px; }
       #controles button { font-size: 1.2rem; padding: 4px 10px; }
       #controles span { font-size: 0.8rem; min-width: 40px; }
@@ -112,13 +118,19 @@
 </head>
 <body>
   <div id="titulo"><span class="destacar">"Ecos del Cielo"</span> 🌿<br>Aves de Emiliano Zapata en Realidad Aumentada</div>
-  <div id="curiosidad-panel"><strong>✨ Curiosidad</strong><span id="curiosidad-texto" class="curiosidad-texto">Cargando...</span></div>
-  <div id="info-panel">
-    <h2 id="nombre-ave">🦜 Cargando...</h2>
-    <p><strong>Nombre científico:</strong> <span id="cientifico" class="cientifico">---</span></p>
-    <p id="caracteristicas"><strong>Características:</strong> ---</p>
-    <p id="envergadura"><strong>Envergadura / Tamaño:</strong> ---</p>
+  
+  <div id="curiosidad-panel">
+    <strong>✨ Curiosidad</strong>
+    <span id="curiosidad-texto" class="mensaje-inicial">🔎 Escanea un marcador para descubrir datos curiosos</span>
   </div>
+
+  <div id="info-panel">
+    <h2 id="nombre-ave">🦜 Escanea un marcador</h2>
+    <p><strong>Nombre científico:</strong> <span id="cientifico" class="cientifico">---</span></p>
+    <p id="caracteristicas"><strong>Características:</strong> <span class="mensaje-inicial">Apunta tu cámara a un marcador para conocer al ave</span></p>
+    <p id="envergadura"><strong>Envergadura / Tamaño:</strong> <span class="mensaje-inicial">---</span></p>
+  </div>
+
   <div id="instruccion">🔍 Apunta la cámara al marcador y arrastra para girar el ave</div>
   <div id="debug">⏳ Inicializando...</div>
 
@@ -280,7 +292,6 @@
     };
 
     // ========== Elementos del DOM ==========
-    const debugEl = document.getElementById('debug');
     const nombreEl = document.getElementById('nombre-ave');
     const cientificoEl = document.getElementById('cientifico');
     const caracteristicasEl = document.getElementById('caracteristicas');
@@ -304,24 +315,21 @@
 
     // ========== Actualizar interfaz al encontrar un ave ==========
     function actualizarInterfazAve(id) {
-      console.log(`Actualizando interfaz para ave #${id}`);
       aveActualId = id;
       const ave = avesData[id];
-      if (!ave) {
-        console.warn('Ave no encontrada para id:', id);
-        return;
-      }
+      if (!ave) return;
 
-      // Actualizar información con las comillas correctas (backticks)
+      // Actualizar información
       nombreEl.innerText = ave.nombre;
       cientificoEl.innerText = ave.cientifico;
       caracteristicasEl.innerHTML = `<strong>Características:</strong> ${ave.caracteristicas}`;
       envergaduraEl.innerHTML = `<strong>Envergadura / Tamaño:</strong> ${ave.envergadura}`;
       curiosidadEl.innerText = ave.curiosidad;
+      // Quitar la clase de mensaje inicial si la tuviera
+      curiosidadEl.className = '';
+      caracteristicasEl.querySelector('.mensaje-inicial')?.remove();
 
-      console.log('Información actualizada:', ave.nombre);
-
-      // Actualizar la escala mostrada (con un pequeño retraso para dar tiempo a cargar)
+      // Actualizar la escala mostrada
       setTimeout(actualizarEscalaMostrada, 400);
 
       // Agregar el componente de rotación al contenedor si no lo tiene
@@ -330,15 +338,13 @@
         container.setAttribute('rotation-drag', '');
       }
 
-      // Escuchar evento 'model-loaded' para actualizar la escala cuando esté cargado
+      // Escuchar evento 'model-loaded' para actualizar la escala
       const modelo = document.getElementById(`model-${id}`);
       if (modelo) {
         modelo.addEventListener('model-loaded', () => {
-          console.log('Modelo cargado, actualizando escala');
           actualizarEscalaMostrada();
         });
-        // Si ya está cargado (por si el evento ya ocurrió)
-        if (modelo.getAttribute('gltf-model') && modelo.getAttribute('gltf-model').loaded) {
+        if (modelo.getAttribute('gltf-model')?.loaded) {
           actualizarEscalaMostrada();
         }
       }
@@ -349,12 +355,9 @@
       const marker = document.getElementById(`marker-${id}`);
       if (marker) {
         marker.addEventListener('markerFound', () => {
-          debugEl.innerText = `🟢 Visualizando Ave #${id}`;
           actualizarInterfazAve(id);
         });
-        marker.addEventListener('markerLost', () => {
-          debugEl.innerText = "⏳ Buscando marcador en cámara...";
-        });
+        // No es necesario ocultar nada al perder el marcador
       }
     });
 
@@ -379,14 +382,6 @@
         modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
         escalaTextoEl.innerText = nuevaEscala.toFixed(2);
       }
-    });
-
-    // ========== Inicialización ==========
-    window.addEventListener('load', () => {
-      debugEl.innerText = "🚀 Sistema AR Activo";
-      nombreEl.innerText = "🦜 Esperando marcador...";
-      curiosidadEl.innerText = "Enfoca el patrón impreso o digital en pantalla.";
-      escalaTextoEl.innerText = "2.00";
     });
   </script>
 </body>
