@@ -60,13 +60,9 @@
       padding: 6px 16px; width: fit-content; margin: 0 auto; border-radius: 30px;
     }
 
-    /* Ocultamos el debug para una experiencia más limpia, pero lo dejamos visible por si acaso */
+    /* Ocultamos el debug para una experiencia más limpia */
     #debug {
-      position: absolute; top: 120px; left: 20px;
-      background: rgba(0,0,0,0.8); color: #ffdd00;
-      padding: 10px 15px; border-radius: 8px; font-size: 0.9rem;
-      max-width: 80%; z-index: 30; pointer-events: none;
-      border: 1px solid #ffdd00;
+      display: none;
     }
 
     /* CONTROLES DE ESCALA REUBICADOS: debajo del título, a la izquierda */
@@ -114,7 +110,6 @@
       #info-panel h2 { font-size: 1.2rem; }
       #info-panel p { font-size: 0.85rem; }
       #instruccion { font-size: 0.8rem; bottom: 10px; padding: 4px 12px; }
-      #debug { top: 100px; left: 10px; font-size: 0.8rem; padding: 6px 10px; }
       #controles { top: 70px; left: 10px; padding: 6px 10px; gap: 5px; }
       #controles button { font-size: 1.2rem; padding: 4px 10px; }
       #controles span { font-size: 0.8rem; min-width: 40px; }
@@ -137,7 +132,7 @@
   </div>
 
   <div id="instruccion">🔍 Apunta la cámara al marcador y arrastra para girar el ave</div>
-  <div id="debug">⏳ Esperando marcador...</div>
+  <div id="debug">⏳ Inicializando...</div>
 
   <!-- Controles de escala -->
   <div id="controles">
@@ -237,7 +232,7 @@
         const dy = e.touches[0].clientY - this.prevY;
         this.rotationY += dx * this.data.sensitivity * 0.01;
         this.rotationX += dy * this.data.sensitivity * 0.01;
-        this.el.setAttribute('rotation', this.rotationX + ' ' + this.rotationY + ' 0');
+        this.el.setAttribute('rotation', `${this.rotationX} ${this.rotationY} 0`);
         this.prevX = e.touches[0].clientX;
         this.prevY = e.touches[0].clientY;
       },
@@ -255,7 +250,7 @@
         const dy = e.clientY - this.prevY;
         this.rotationY += dx * this.data.sensitivity * 0.01;
         this.rotationX += dy * this.data.sensitivity * 0.01;
-        this.el.setAttribute('rotation', this.rotationX + ' ' + this.rotationY + ' 0');
+        this.el.setAttribute('rotation', `${this.rotationX} ${this.rotationY} 0`);
         this.prevX = e.clientX;
         this.prevY = e.clientY;
       },
@@ -297,7 +292,6 @@
     };
 
     // ========== Elementos del DOM ==========
-    const debugEl = document.getElementById('debug');
     const nombreEl = document.getElementById('nombre-ave');
     const cientificoEl = document.getElementById('cientifico');
     const caracteristicasEl = document.getElementById('caracteristicas');
@@ -310,97 +304,84 @@
     // ========== Función para actualizar la escala mostrada ==========
     function actualizarEscalaMostrada() {
       if (!aveActualId) return;
-      const modelo = document.getElementById('model-' + aveActualId);
+      const modelo = document.getElementById(`model-${aveActualId}`);
       if (modelo) {
         const scale = modelo.getAttribute('scale');
         if (scale && scale.x) {
-          escalaTextoEl.textContent = scale.x.toFixed(2);
+          escalaTextoEl.innerText = scale.x.toFixed(2);
         }
       }
     }
 
     // ========== Actualizar interfaz al encontrar un ave ==========
     function actualizarInterfazAve(id) {
-      debugEl.textContent = '🟢 Ave encontrada: ID ' + id;
-      console.log('actualizarInterfazAve called for id:', id);
-
       aveActualId = id;
       const ave = avesData[id];
-      if (!ave) {
-        debugEl.textContent = '❌ Error: Ave no encontrada para ID ' + id;
-        return;
-      }
+      if (!ave) return;
 
-      // Actualizar información usando textContent y concatenación simple
-      nombreEl.textContent = ave.nombre;
-      cientificoEl.textContent = ave.cientifico;
-      // Para las características y envergadura usamos innerHTML para mantener el <strong>
-      caracteristicasEl.innerHTML = '<strong>Características:</strong> ' + ave.caracteristicas;
-      envergaduraEl.innerHTML = '<strong>Envergadura / Tamaño:</strong> ' + ave.envergadura;
-      curiosidadEl.textContent = ave.curiosidad;
-      // Quitar clase de mensaje inicial
+      // Actualizar información
+      nombreEl.innerText = ave.nombre;
+      cientificoEl.innerText = ave.cientifico;
+      caracteristicasEl.innerHTML = `<strong>Características:</strong> ${ave.caracteristicas}`;
+      envergaduraEl.innerHTML = `<strong>Envergadura / Tamaño:</strong> ${ave.envergadura}`;
+      curiosidadEl.innerText = ave.curiosidad;
+      // Quitar la clase de mensaje inicial si la tuviera
       curiosidadEl.className = '';
+      caracteristicasEl.querySelector('.mensaje-inicial')?.remove();
 
       // Actualizar la escala mostrada
       setTimeout(actualizarEscalaMostrada, 400);
 
       // Agregar el componente de rotación al contenedor si no lo tiene
-      const container = document.getElementById('container-' + id);
+      const container = document.getElementById(`container-${id}`);
       if (container && !container.components['rotation-drag']) {
         container.setAttribute('rotation-drag', '');
       }
 
       // Escuchar evento 'model-loaded' para actualizar la escala
-      const modelo = document.getElementById('model-' + id);
+      const modelo = document.getElementById(`model-${id}`);
       if (modelo) {
-        modelo.addEventListener('model-loaded', function() {
+        modelo.addEventListener('model-loaded', () => {
           actualizarEscalaMostrada();
         });
-        // Si ya está cargado, forzar actualización
-        if (modelo.getAttribute('gltf-model') && modelo.getAttribute('gltf-model').loaded) {
+        if (modelo.getAttribute('gltf-model')?.loaded) {
           actualizarEscalaMostrada();
         }
       }
-
-      debugEl.textContent = '✅ Información actualizada para ' + ave.nombre;
     }
 
     // ========== Eventos de los marcadores ==========
-    [1, 2, 3, 4].forEach(function(id) {
-      var marker = document.getElementById('marker-' + id);
+    [1, 2, 3, 4].forEach(id => {
+      const marker = document.getElementById(`marker-${id}`);
       if (marker) {
-        marker.addEventListener('markerFound', function() {
+        marker.addEventListener('markerFound', () => {
           actualizarInterfazAve(id);
         });
+        // No es necesario ocultar nada al perder el marcador
       }
     });
 
     // ========== Controles de escala ==========
-    document.getElementById('btn-mas').addEventListener('click', function() {
+    document.getElementById('btn-mas').addEventListener('click', () => {
       if (!aveActualId) return;
-      var modelo = document.getElementById('model-' + aveActualId);
+      const modelo = document.getElementById(`model-${aveActualId}`);
       if (modelo) {
-        var scale = modelo.getAttribute('scale');
-        var nuevaEscala = scale.x + 0.2;
-        modelo.setAttribute('scale', nuevaEscala + ' ' + nuevaEscala + ' ' + nuevaEscala);
-        escalaTextoEl.textContent = nuevaEscala.toFixed(2);
+        let scale = modelo.getAttribute('scale');
+        let nuevaEscala = scale.x + 0.2;
+        modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
+        escalaTextoEl.innerText = nuevaEscala.toFixed(2);
       }
     });
 
-    document.getElementById('btn-menos').addEventListener('click', function() {
+    document.getElementById('btn-menos').addEventListener('click', () => {
       if (!aveActualId) return;
-      var modelo = document.getElementById('model-' + aveActualId);
+      const modelo = document.getElementById(`model-${aveActualId}`);
       if (modelo) {
-        var scale = modelo.getAttribute('scale');
-        var nuevaEscala = Math.max(0.2, scale.x - 0.2);
-        modelo.setAttribute('scale', nuevaEscala + ' ' + nuevaEscala + ' ' + nuevaEscala);
-        escalaTextoEl.textContent = nuevaEscala.toFixed(2);
+        let scale = modelo.getAttribute('scale');
+        let nuevaEscala = Math.max(0.2, scale.x - 0.2);
+        modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
+        escalaTextoEl.innerText = nuevaEscala.toFixed(2);
       }
-    });
-
-    // ========== Inicialización ==========
-    window.addEventListener('load', function() {
-      debugEl.textContent = '🚀 Sistema listo. Escanea un marcador.';
     });
   </script>
 </body>
