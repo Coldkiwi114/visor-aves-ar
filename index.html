@@ -47,10 +47,6 @@
       transition: opacity 0.3s ease;
     }
     #curiosidad-panel strong { color: #ffd700; display: block; margin-bottom: 5px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
-    #curiosidad-panel .mensaje-inicial {
-      color: #aaaaaa;
-      font-size: 0.9rem;
-    }
 
     #instruccion {
       position: absolute; bottom: 15px; left: 0; right: 0; text-align: center;
@@ -58,10 +54,6 @@
       text-shadow: 0 2px 10px rgba(0,0,0,0.9); pointer-events: none; z-index: 10;
       background: rgba(0,0,0,0.25); backdrop-filter: blur(4px);
       padding: 6px 16px; width: fit-content; margin: 0 auto; border-radius: 30px;
-    }
-
-    #debug {
-      display: none;
     }
 
     #controles {
@@ -130,7 +122,6 @@
   </div>
 
   <div id="instruccion">🔍 Apunta la cámara al marcador y arrastra para girar el ave</div>
-  <div id="debug">⏳ Inicializando...</div>
 
   <!-- Controles de escala -->
   <div id="controles">
@@ -148,29 +139,26 @@
     <a-light type="directional" color="#ffffff" intensity="0.6" position="-1 0.5 -1"></a-light>
     <a-light type="hemisphere" color="#ffffff" ground-color="#444444" intensity="0.5"></a-light>
 
-    <!-- MARCADOR 1: Pijije Aliblanco -->
-    <a-marker type="pattern" url="./markers/pattern-ave1.patt" id="marker-1">
+    <!-- MARCADORES CON EL ATRIBUTO marker-handler -->
+    <a-marker type="pattern" url="./markers/pattern-ave1.patt" id="marker-1" marker-handler>
       <a-entity id="container-1" rotation="-90 0 0" position="0 0.1 0">
         <a-entity id="model-1" gltf-model="./models/ave1.glb" scale="2 2 2"></a-entity>
       </a-entity>
     </a-marker>
 
-    <!-- MARCADOR 2: Chachalaca -->
-    <a-marker type="pattern" url="./markers/pattern-ave2.patt" id="marker-2">
+    <a-marker type="pattern" url="./markers/pattern-ave2.patt" id="marker-2" marker-handler>
       <a-entity id="container-2" rotation="-90 0 0" position="0 0.1 0">
         <a-entity id="model-2" gltf-model="./models/ave2.glb" scale="2 2 2"></a-entity>
       </a-entity>
     </a-marker>
 
-    <!-- MARCADOR 3: Garza Tigre Mexicana -->
-    <a-marker type="pattern" url="./markers/pattern-ave3.patt" id="marker-3">
+    <a-marker type="pattern" url="./markers/pattern-ave3.patt" id="marker-3" marker-handler>
       <a-entity id="container-3" rotation="-90 0 0" position="0 0.1 0">
         <a-entity id="model-3" gltf-model="./models/ave3.glb" scale="2 2 2"></a-entity>
       </a-entity>
     </a-marker>
 
-    <!-- MARCADOR 4: Benteveo Común -->
-    <a-marker type="pattern" url="./markers/pattern-ave4.patt" id="marker-4">
+    <a-marker type="pattern" url="./markers/pattern-ave4.patt" id="marker-4" marker-handler>
       <a-entity id="container-4" rotation="-90 0 0" position="0 0.1 0">
         <a-entity id="model-4" gltf-model="./models/ave4.glb" scale="2 2 2"></a-entity>
       </a-entity>
@@ -179,6 +167,16 @@
   </a-scene>
 
   <script>
+    // ========== Componente de detección de Marcadores (AR.js / A-Frame) ==========
+    AFRAME.registerComponent('marker-handler', {
+      init: function () {
+        this.el.addEventListener('markerFound', () => {
+          const id = this.el.id.replace('marker-', '');
+          actualizarInterfazAve(id);
+        });
+      }
+    });
+
     // ========== Componente de rotación con arrastre ==========
     AFRAME.registerComponent('rotation-drag', {
       schema: { sensitivity: { default: 0.5 } },
@@ -188,6 +186,7 @@
         this.isDragging = false;
         this.prevX = 0;
         this.prevY = 0;
+
         this.onTouchStart = this.onTouchStart.bind(this);
         this.onTouchMove = this.onTouchMove.bind(this);
         this.onTouchEnd = this.onTouchEnd.bind(this);
@@ -291,153 +290,63 @@
     const envergaduraEl = document.getElementById('envergadura');
     const curiosidadEl = document.getElementById('curiosidad-texto');
     const escalaTextoEl = document.getElementById('escala-texto');
-    const infoPanel = document.getElementById('info-panel');
 
     let aveActualId = null;
 
-    // ========== Función para actualizar la escala mostrada ==========
+    // ========== Actualizar escala en pantalla leyendo 3D directo ==========
     function actualizarEscalaMostrada() {
-      if (!aveActualId) {
-        escalaTextoEl.innerText = '--';
-        return;
-      }
+      if (!aveActualId) return;
       const modelo = document.getElementById(`model-${aveActualId}`);
-      if (modelo) {
-        const scale = modelo.getAttribute('scale');
-        if (scale && typeof scale.x === 'number') {
-          escalaTextoEl.innerText = scale.x.toFixed(2);
-        } else {
-          // Si el modelo no tiene escala, asignar 2 por defecto
-          modelo.setAttribute('scale', '2 2 2');
-          escalaTextoEl.innerText = '2.00';
-        }
+      if (modelo && modelo.object3D) {
+        escalaTextoEl.innerText = modelo.object3D.scale.x.toFixed(2);
       }
     }
 
     // ========== Actualizar interfaz al encontrar un ave ==========
     function actualizarInterfazAve(id) {
-      try {
-        console.log(`🟢 Marcador detectado: ${id}`);
-        aveActualId = id;
-        const ave = avesData[id];
-        if (!ave) {
-          console.warn(`No hay datos para el ave ${id}`);
-          return;
-        }
+      aveActualId = id;
+      const ave = avesData[id];
+      if (!ave) return;
 
-        // Actualizar información
-        nombreEl.innerText = ave.nombre;
-        cientificoEl.innerText = ave.cientifico;
-        caracteristicasEl.innerHTML = `<strong>Características:</strong> ${ave.caracteristicas}`;
-        envergaduraEl.innerHTML = `<strong>Envergadura / Tamaño:</strong> ${ave.envergadura}`;
-        curiosidadEl.innerText = ave.curiosidad;
-        curiosidadEl.className = ''; // quitar clase de mensaje inicial
+      // Actualizar información
+      nombreEl.innerText = ave.nombre;
+      cientificoEl.innerText = ave.cientifico;
+      caracteristicasEl.innerHTML = `<strong>Características:</strong> ${ave.caracteristicas}`;
+      envergaduraEl.innerHTML = `<strong>Envergadura / Tamaño:</strong> ${ave.envergadura}`;
+      curiosidadEl.innerText = ave.curiosidad;
+      curiosidadEl.className = '';
 
-        // Mostrar un mensaje temporal en el panel para confirmar detección
-        const mensajeDetectado = document.createElement('div');
-        mensajeDetectado.style.cssText = 'color: #ffd700; font-weight: bold; margin-top: 6px;';
-        mensajeDetectado.innerText = '✅ ¡Ave detectada!';
-        const existente = infoPanel.querySelector('.detectado-msg');
-        if (existente) existente.remove();
-        mensajeDetectado.className = 'detectado-msg';
-        infoPanel.appendChild(mensajeDetectado);
-        setTimeout(() => { if (mensajeDetectado.parentNode) mensajeDetectado.remove(); }, 3000);
-
-        // Agregar componente de rotación al contenedor si no existe
-        const container = document.getElementById(`container-${id}`);
-        if (container && !container.components['rotation-drag']) {
-          container.setAttribute('rotation-drag', '');
-        }
-
-        // Esperar a que el modelo esté cargado para actualizar la escala
-        const modelo = document.getElementById(`model-${id}`);
-        if (modelo) {
-          // Si ya está cargado, actualizar ahora
-          if (modelo.getAttribute('gltf-model') && modelo.components['gltf-model']?.data) {
-            actualizarEscalaMostrada();
-          } else {
-            modelo.addEventListener('model-loaded', function onLoad() {
-              actualizarEscalaMostrada();
-              modelo.removeEventListener('model-loaded', onLoad);
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error al actualizar interfaz:', error);
+      // Agregar componente de rotación si no lo tiene
+      const container = document.getElementById(`container-${id}`);
+      if (container && !container.components['rotation-drag']) {
+        container.setAttribute('rotation-drag', '');
       }
-    }
 
-    // ========== Inicialización: esperar a que la escena esté lista ==========
-    const scene = document.querySelector('a-scene');
-    if (scene) {
-      scene.addEventListener('loaded', function () {
-        console.log('🚀 Escena AR cargada. Registrando eventos de marcadores...');
-
-        // Registrar eventos para cada marcador
-        [1, 2, 3, 4].forEach(id => {
-          const marker = document.getElementById(`marker-${id}`);
-          if (marker) {
-            // Usar el evento más confiable en AR.js
-            marker.addEventListener('arjs-marker-found', () => {
-              actualizarInterfazAve(id);
-            });
-            // Opcional: también escuchar markerFound por compatibilidad
-            marker.addEventListener('markerFound', () => {
-              actualizarInterfazAve(id);
-            });
-          } else {
-            console.warn(`Marcador marker-${id} no encontrado en el DOM`);
-          }
-        });
-
-        // Mostrar mensaje en consola de que los eventos están listos
-        document.getElementById('debug').innerText = '✅ Listo. Escanea un marcador.';
-      });
-    } else {
-      console.error('No se encontró la escena a-scene');
+      actualizarEscalaMostrada();
     }
 
     // ========== Controles de escala ==========
     document.getElementById('btn-mas').addEventListener('click', () => {
-      if (!aveActualId) {
-        alert('Primero escanea un marcador para ajustar el tamaño.');
-        return;
-      }
+      if (!aveActualId) return;
       const modelo = document.getElementById(`model-${aveActualId}`);
-      if (modelo) {
-        let scale = modelo.getAttribute('scale');
-        let nuevaEscala = (scale && typeof scale.x === 'number') ? scale.x + 0.2 : 2.2;
+      if (modelo && modelo.object3D) {
+        let currentScale = modelo.object3D.scale.x;
+        let nuevaEscala = currentScale + 0.2;
         modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
         escalaTextoEl.innerText = nuevaEscala.toFixed(2);
       }
     });
 
     document.getElementById('btn-menos').addEventListener('click', () => {
-      if (!aveActualId) {
-        alert('Primero escanea un marcador para ajustar el tamaño.');
-        return;
-      }
+      if (!aveActualId) return;
       const modelo = document.getElementById(`model-${aveActualId}`);
-      if (modelo) {
-        let scale = modelo.getAttribute('scale');
-        let actual = (scale && typeof scale.x === 'number') ? scale.x : 2;
-        let nuevaEscala = Math.max(0.2, actual - 0.2);
+      if (modelo && modelo.object3D) {
+        let currentScale = modelo.object3D.scale.x;
+        let nuevaEscala = Math.max(0.2, currentScale - 0.2);
         modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
         escalaTextoEl.innerText = nuevaEscala.toFixed(2);
       }
     });
-
-    // ========== Actualizar la escala al cargar la página (por si ya hay un marcador visible) ==========
-    setTimeout(() => {
-      // Si algún marcador ya está detectado, el evento se disparará al registrarse
-      // Pero por si acaso, forzamos una comprobación después de 2 segundos
-      [1, 2, 3, 4].forEach(id => {
-        const marker = document.getElementById(`marker-${id}`);
-        if (marker && marker.getAttribute('visible') === 'true') {
-          actualizarInterfazAve(id);
-        }
-      });
-    }, 2000);
   </script>
 </body>
 </html>
