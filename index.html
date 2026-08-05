@@ -61,7 +61,7 @@
     /* CONTROLES DE ESCALA REUBICADOS: debajo del título, a la izquierda */
     #controles {
       position: absolute;
-      top: 80px;          /* justo debajo del título */
+      top: 80px;
       left: 20px;
       z-index: 40;
       display: flex;
@@ -122,10 +122,10 @@
   <div id="instruccion">🔍 Apunta la cámara al marcador y arrastra para girar el ave</div>
   <div id="debug">⏳ Inicializando...</div>
 
-  <!-- Controles de escala (reubicados) -->
+  <!-- Controles de escala -->
   <div id="controles">
     <button id="btn-menos">➖</button>
-    <span id="escala-texto">1.00</span>
+    <span id="escala-texto">2.00</span>
     <button id="btn-mas">➕</button>
   </div>
 
@@ -142,28 +142,28 @@
     <a-marker type="pattern" url="./markers/pattern-ave1.patt" id="marker-1">
       <!-- Contenedor que permite rotación con arrastre -->
       <a-entity id="container-1" rotation="-90 0 0" position="0 0.1 0">
-        <a-entity id="model-1" gltf-model="./models/ave1.glb" scale="1 1 1"></a-entity>
+        <a-entity id="model-1" gltf-model="./models/ave1.glb" scale="2 2 2"></a-entity>
       </a-entity>
     </a-marker>
 
     <!-- MARCADOR 2: Chachalaca -->
     <a-marker type="pattern" url="./markers/pattern-ave2.patt" id="marker-2">
       <a-entity id="container-2" rotation="-90 0 0" position="0 0.1 0">
-        <a-entity id="model-2" gltf-model="./models/ave2.glb" scale="1 1 1"></a-entity>
+        <a-entity id="model-2" gltf-model="./models/ave2.glb" scale="2 2 2"></a-entity>
       </a-entity>
     </a-marker>
 
     <!-- MARCADOR 3: Garza Tigre Mexicana -->
     <a-marker type="pattern" url="./markers/pattern-ave3.patt" id="marker-3">
       <a-entity id="container-3" rotation="-90 0 0" position="0 0.1 0">
-        <a-entity id="model-3" gltf-model="./models/ave3.glb" scale="1 1 1"></a-entity>
+        <a-entity id="model-3" gltf-model="./models/ave3.glb" scale="2 2 2"></a-entity>
       </a-entity>
     </a-marker>
 
     <!-- MARCADOR 4: Benteveo Común -->
     <a-marker type="pattern" url="./markers/pattern-ave4.patt" id="marker-4">
       <a-entity id="container-4" rotation="-90 0 0" position="0 0.1 0">
-        <a-entity id="model-4" gltf-model="./models/ave4.glb" scale="1 1 1"></a-entity>
+        <a-entity id="model-4" gltf-model="./models/ave4.glb" scale="2 2 2"></a-entity>
       </a-entity>
     </a-marker>
 
@@ -191,25 +191,21 @@
       },
       play: function () {
         const canvas = document.querySelector('a-scene').canvas;
-        if (canvas) {
-          canvas.addEventListener('touchstart', this.onTouchStart, { passive: false });
-          canvas.addEventListener('touchmove', this.onTouchMove, { passive: false });
-          canvas.addEventListener('touchend', this.onTouchEnd);
-          canvas.addEventListener('mousedown', this.onMouseDown);
-          window.addEventListener('mousemove', this.onMouseMove);
-          window.addEventListener('mouseup', this.onMouseUp);
-        }
+        canvas.addEventListener('touchstart', this.onTouchStart, { passive: false });
+        canvas.addEventListener('touchmove', this.onTouchMove, { passive: false });
+        canvas.addEventListener('touchend', this.onTouchEnd);
+        canvas.addEventListener('mousedown', this.onMouseDown);
+        window.addEventListener('mousemove', this.onMouseMove);
+        window.addEventListener('mouseup', this.onMouseUp);
       },
       pause: function () {
         const canvas = document.querySelector('a-scene').canvas;
-        if (canvas) {
-          canvas.removeEventListener('touchstart', this.onTouchStart);
-          canvas.removeEventListener('touchmove', this.onTouchMove);
-          canvas.removeEventListener('touchend', this.onTouchEnd);
-          canvas.removeEventListener('mousedown', this.onMouseDown);
-          window.removeEventListener('mousemove', this.onMouseMove);
-          window.removeEventListener('mouseup', this.onMouseUp);
-        }
+        canvas.removeEventListener('touchstart', this.onTouchStart);
+        canvas.removeEventListener('touchmove', this.onTouchMove);
+        canvas.removeEventListener('touchend', this.onTouchEnd);
+        canvas.removeEventListener('mousedown', this.onMouseDown);
+        window.removeEventListener('mousemove', this.onMouseMove);
+        window.removeEventListener('mouseup', this.onMouseUp);
       },
       onTouchStart: function (e) {
         if (e.touches.length === 1) {
@@ -302,104 +298,84 @@
       instruccionEl.innerText = "🔍 Escanea un marcador y arrastra para girar el ave";
       nombreEl.innerText = "🦜 Esperando marcador...";
       curiosidadEl.innerText = "Enfoca el patrón impreso o digital en pantalla.";
-      escalaTextoEl.innerText = "1.00";
+      escalaTextoEl.innerText = "2.00"; // escala inicial
     });
+
+    // ========== Función para actualizar la escala mostrada ==========
+    function actualizarEscalaMostrada(id) {
+      const modelo = document.getElementById(`model-${id}`);
+      if (modelo) {
+        const scale = modelo.getAttribute('scale');
+        if (scale && scale.x) {
+          escalaTextoEl.innerText = scale.x.toFixed(2);
+        }
+      }
+    }
 
     // ========== Actualizar interfaz al encontrar un ave ==========
     function actualizarInterfazAve(id) {
-      console.log(`Actualizando interfaz para ave #${id}`);
       aveActualId = id;
       const ave = avesData[id];
-      if (!ave) {
-        console.error(`No se encontraron datos para el ave #${id}`);
-        return;
-      }
+      if (!ave) return;
+
       nombreEl.innerText = ave.nombre;
       cientificoEl.innerText = ave.cientifico;
       caracteristicasEl.innerHTML = `<strong>Características:</strong> ${ave.caracteristicas}`;
       envergaduraEl.innerHTML = `<strong>Envergadura / Tamaño:</strong> ${ave.envergadura}`;
       curiosidadEl.innerText = ave.curiosidad;
 
-      // Intentar obtener la escala del modelo (puede que aún no esté cargado)
-      const modelo = document.getElementById(`model-${id}`);
-      if (modelo) {
-        try {
-          const currentScale = modelo.getAttribute('scale');
-          if (currentScale && currentScale.x) {
-            escalaTextoEl.innerText = currentScale.x.toFixed(2);
-          }
-        } catch (e) {
-          console.warn('No se pudo leer la escala del modelo:', e);
-        }
-      } else {
-        console.warn(`Modelo #${id} no encontrado aún, se actualizará más tarde`);
-      }
+      // Actualizar la escala mostrada (con un pequeño retraso para asegurar que el modelo esté cargado)
+      setTimeout(() => actualizarEscalaMostrada(id), 300);
 
       // Agregar el componente de rotación al contenedor si no lo tiene
       const container = document.getElementById(`container-${id}`);
       if (container && !container.components['rotation-drag']) {
         container.setAttribute('rotation-drag', '');
-        console.log(`Componente rotation-drag añadido al contenedor #${id}`);
+      }
+
+      // Escuchar el evento 'model-loaded' del modelo para actualizar la escala cuando se cargue
+      const modelo = document.getElementById(`model-${id}`);
+      if (modelo) {
+        modelo.addEventListener('model-loaded', () => {
+          actualizarEscalaMostrada(id);
+        });
       }
     }
 
-    // ========== Configurar eventos cuando la escena esté lista ==========
-    const scene = document.querySelector('a-scene');
-    if (scene) {
-      scene.addEventListener('loaded', function () {
-        console.log('Escena AR cargada, asignando eventos a los marcadores');
-        [1, 2, 3, 4].forEach(id => {
-          const marker = document.getElementById(`marker-${id}`);
-          if (marker) {
-            marker.addEventListener('markerFound', () => {
-              console.log(`Marcador #${id} encontrado`);
-              debugEl.innerText = `🟢 Visualizando Ave #${id}`;
-              actualizarInterfazAve(id);
-            });
-            marker.addEventListener('markerLost', () => {
-              debugEl.innerText = "⏳ Buscando marcador en cámara...";
-            });
-          } else {
-            console.warn(`Marcador #${id} no encontrado en el DOM`);
-          }
+    // ========== Eventos de los marcadores ==========
+    [1, 2, 3, 4].forEach(id => {
+      const marker = document.getElementById(`marker-${id}`);
+      if (marker) {
+        marker.addEventListener('markerFound', () => {
+          debugEl.innerText = `🟢 Visualizando Ave #${id}`;
+          actualizarInterfazAve(id);
         });
-      });
-    } else {
-      console.error('No se encontró la escena a-scene');
-    }
+        marker.addEventListener('markerLost', () => {
+          debugEl.innerText = "⏳ Buscando marcador en cámara...";
+        });
+      }
+    });
 
     // ========== Controles de escala ==========
     document.getElementById('btn-mas').addEventListener('click', () => {
-      if (!aveActualId) {
-        console.warn('No hay ave seleccionada para escalar');
-        return;
-      }
+      if (!aveActualId) return;
       const modelo = document.getElementById(`model-${aveActualId}`);
       if (modelo) {
         let scale = modelo.getAttribute('scale');
-        let nuevaEscala = scale.x + 0.1;
+        let nuevaEscala = scale.x + 0.2; // incremento de 0.2 para que se note con escala 2
         modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
         escalaTextoEl.innerText = nuevaEscala.toFixed(2);
-        console.log(`Nueva escala: ${nuevaEscala.toFixed(2)}`);
-      } else {
-        console.warn(`Modelo #${aveActualId} no encontrado`);
       }
     });
 
     document.getElementById('btn-menos').addEventListener('click', () => {
-      if (!aveActualId) {
-        console.warn('No hay ave seleccionada para escalar');
-        return;
-      }
+      if (!aveActualId) return;
       const modelo = document.getElementById(`model-${aveActualId}`);
       if (modelo) {
         let scale = modelo.getAttribute('scale');
-        let nuevaEscala = Math.max(0.1, scale.x - 0.1);
+        let nuevaEscala = Math.max(0.2, scale.x - 0.2);
         modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
         escalaTextoEl.innerText = nuevaEscala.toFixed(2);
-        console.log(`Nueva escala: ${nuevaEscala.toFixed(2)}`);
-      } else {
-        console.warn(`Modelo #${aveActualId} no encontrado`);
       }
     });
   </script>
