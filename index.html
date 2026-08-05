@@ -140,7 +140,6 @@
 
     <!-- MARCADOR 1: Pijije Aliblanco -->
     <a-marker type="pattern" url="./markers/pattern-ave1.patt" id="marker-1">
-      <!-- Contenedor que permite rotación con arrastre -->
       <a-entity id="container-1" rotation="-90 0 0" position="0 0.1 0">
         <a-entity id="model-1" gltf-model="./models/ave1.glb" scale="2 2 2"></a-entity>
       </a-entity>
@@ -282,7 +281,6 @@
 
     // ========== Elementos del DOM ==========
     const debugEl = document.getElementById('debug');
-    const instruccionEl = document.getElementById('instruccion');
     const nombreEl = document.getElementById('nombre-ave');
     const cientificoEl = document.getElementById('cientifico');
     const caracteristicasEl = document.getElementById('caracteristicas');
@@ -292,18 +290,10 @@
 
     let aveActualId = null;
 
-    // ========== Inicialización ==========
-    window.addEventListener('load', () => {
-      debugEl.innerText = "🚀 Sistema AR Activo";
-      instruccionEl.innerText = "🔍 Escanea un marcador y arrastra para girar el ave";
-      nombreEl.innerText = "🦜 Esperando marcador...";
-      curiosidadEl.innerText = "Enfoca el patrón impreso o digital en pantalla.";
-      escalaTextoEl.innerText = "2.00"; // escala inicial
-    });
-
     // ========== Función para actualizar la escala mostrada ==========
-    function actualizarEscalaMostrada(id) {
-      const modelo = document.getElementById(`model-${id}`);
+    function actualizarEscalaMostrada() {
+      if (!aveActualId) return;
+      const modelo = document.getElementById(`model-${aveActualId}`);
       if (modelo) {
         const scale = modelo.getAttribute('scale');
         if (scale && scale.x) {
@@ -314,18 +304,25 @@
 
     // ========== Actualizar interfaz al encontrar un ave ==========
     function actualizarInterfazAve(id) {
+      console.log(`Actualizando interfaz para ave #${id}`);
       aveActualId = id;
       const ave = avesData[id];
-      if (!ave) return;
+      if (!ave) {
+        console.warn('Ave no encontrada para id:', id);
+        return;
+      }
 
+      // Actualizar información con las comillas correctas (backticks)
       nombreEl.innerText = ave.nombre;
       cientificoEl.innerText = ave.cientifico;
       caracteristicasEl.innerHTML = `<strong>Características:</strong> ${ave.caracteristicas}`;
       envergaduraEl.innerHTML = `<strong>Envergadura / Tamaño:</strong> ${ave.envergadura}`;
       curiosidadEl.innerText = ave.curiosidad;
 
-      // Actualizar la escala mostrada (con un pequeño retraso para asegurar que el modelo esté cargado)
-      setTimeout(() => actualizarEscalaMostrada(id), 300);
+      console.log('Información actualizada:', ave.nombre);
+
+      // Actualizar la escala mostrada (con un pequeño retraso para dar tiempo a cargar)
+      setTimeout(actualizarEscalaMostrada, 400);
 
       // Agregar el componente de rotación al contenedor si no lo tiene
       const container = document.getElementById(`container-${id}`);
@@ -333,12 +330,17 @@
         container.setAttribute('rotation-drag', '');
       }
 
-      // Escuchar el evento 'model-loaded' del modelo para actualizar la escala cuando se cargue
+      // Escuchar evento 'model-loaded' para actualizar la escala cuando esté cargado
       const modelo = document.getElementById(`model-${id}`);
       if (modelo) {
         modelo.addEventListener('model-loaded', () => {
-          actualizarEscalaMostrada(id);
+          console.log('Modelo cargado, actualizando escala');
+          actualizarEscalaMostrada();
         });
+        // Si ya está cargado (por si el evento ya ocurrió)
+        if (modelo.getAttribute('gltf-model') && modelo.getAttribute('gltf-model').loaded) {
+          actualizarEscalaMostrada();
+        }
       }
     }
 
@@ -362,7 +364,7 @@
       const modelo = document.getElementById(`model-${aveActualId}`);
       if (modelo) {
         let scale = modelo.getAttribute('scale');
-        let nuevaEscala = scale.x + 0.2; // incremento de 0.2 para que se note con escala 2
+        let nuevaEscala = scale.x + 0.2;
         modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
         escalaTextoEl.innerText = nuevaEscala.toFixed(2);
       }
@@ -377,6 +379,14 @@
         modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
         escalaTextoEl.innerText = nuevaEscala.toFixed(2);
       }
+    });
+
+    // ========== Inicialización ==========
+    window.addEventListener('load', () => {
+      debugEl.innerText = "🚀 Sistema AR Activo";
+      nombreEl.innerText = "🦜 Esperando marcador...";
+      curiosidadEl.innerText = "Enfoca el patrón impreso o digital en pantalla.";
+      escalaTextoEl.innerText = "2.00";
     });
   </script>
 </body>
