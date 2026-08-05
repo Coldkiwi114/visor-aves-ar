@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Visor AR - Aves de México</title>
-  <!-- SOLUCIÓN DE VERSIONES: A-Frame 1.3.0 + AR.js compatible con marcadores custom -->
-  <script src="https://aframe.io"></script>
-  <script src="https://githack.com"></script>
+  <!-- VERSIONES ESTABLES: A-Frame 1.3.0 + AR.js (compatible con marcadores custom) -->
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
   <style>
     body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
     #titulo { position: absolute; top: 20px; left: 0; right: 0; text-align: center; color: white; font-size: 1.4rem; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,0.9); background: rgba(0,0,0,0.45); backdrop-filter: blur(6px); padding: 12px 20px; width: fit-content; margin: 0 auto; border-radius: 40px; border: 1px solid rgba(255,215,0,0.3); z-index: 20; pointer-events: none; max-width: 90%; }
@@ -82,34 +82,81 @@
     <button id="btn-mas">➕</button>
   </div>
 
-  <!-- ESCENA AR CORREGIDA: Ajustada la iluminación y desactivado el log innecesario -->
+  <!-- ESCENA AR -->
   <a-scene embedded arjs="debugUIEnabled: false; sourceType: webcam; patternRatio: 0.50;" renderer="logarithmicDepthBuffer: true; precision: medium;">
     
+    <!-- Luces para que los modelos se vean bien -->
+    <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="0.8" position="1 1 1"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="0.5" position="-1 0.5 -1"></a-light>
+
     <!-- MARCADOR 1: Pijije Aliblanco -->
     <a-marker type="pattern" url="./markers/pattern-ave1.patt" id="marker-1">
-      
+      <a-entity id="ave-1" scale="0.15 0.15 0.15">
+        <!-- Cuerpo (esfera) -->
+        <a-sphere color="#d4a373" radius="0.3" position="0 0.3 0"></a-sphere>
+        <!-- Cabeza -->
+        <a-sphere color="#d4a373" radius="0.18" position="0 0.6 0.2"></a-sphere>
+        <!-- Pico -->
+        <a-cone color="#f4a261" radius-bottom="0.05" radius-top="0.02" height="0.15" position="0 0.58 0.35" rotation="-90 0 0"></a-cone>
+        <!-- Ojos -->
+        <a-sphere color="#000" radius="0.04" position="-0.08 0.62 0.28"></a-sphere>
+        <a-sphere color="#000" radius="0.04" position="0.08 0.62 0.28"></a-sphere>
+        <!-- Alas (planos) -->
+        <a-box color="#8d6b4e" width="0.6" height="0.05" depth="0.2" position="-0.35 0.3 0"></a-box>
+        <a-box color="#8d6b4e" width="0.6" height="0.05" depth="0.2" position="0.35 0.3 0"></a-box>
+        <!-- Cola -->
+        <a-box color="#8d6b4e" width="0.15" height="0.05" depth="0.25" position="0 0.3 -0.35"></a-box>
+        <!-- Texto flotante -->
+        <a-text value="Pijije Aliblanco" color="#fff" align="center" position="0 -0.3 0" scale="0.8 0.8 0.8"></a-text>
+      </a-entity>
     </a-marker>
 
     <!-- MARCADOR 2: Chachalaca -->
     <a-marker type="pattern" url="./markers/pattern-ave2.patt" id="marker-2">
-      
+      <a-entity id="ave-2" scale="0.15 0.15 0.15">
+        <a-sphere color="#8b7355" radius="0.35" position="0 0.35 0"></a-sphere>
+        <a-sphere color="#8b7355" radius="0.2" position="0 0.65 0.2"></a-sphere>
+        <a-cone color="#b08968" radius-bottom="0.06" radius-top="0.02" height="0.18" position="0 0.63 0.38" rotation="-90 0 0"></a-cone>
+        <a-sphere color="#000" radius="0.05" position="-0.1 0.68 0.28"></a-sphere>
+        <a-sphere color="#000" radius="0.05" position="0.1 0.68 0.28"></a-sphere>
+        <a-box color="#6b5b4a" width="0.7" height="0.06" depth="0.25" position="-0.4 0.35 0"></a-box>
+        <a-box color="#6b5b4a" width="0.7" height="0.06" depth="0.25" position="0.4 0.35 0"></a-box>
+        <a-box color="#6b5b4a" width="0.2" height="0.06" depth="0.3" position="0 0.35 -0.4"></a-box>
+        <a-text value="Chachalaca" color="#fff" align="center" position="0 -0.3 0" scale="0.8 0.8 0.8"></a-text>
+      </a-entity>
     </a-marker>
 
     <!-- MARCADOR 3: Garza Tigre Mexicana -->
     <a-marker type="pattern" url="./markers/pattern-ave3.patt" id="marker-3">
-      
+      <a-entity id="ave-3" scale="0.15 0.15 0.15">
+        <a-sphere color="#a68a6b" radius="0.4" position="0 0.4 0"></a-sphere>
+        <a-sphere color="#a68a6b" radius="0.22" position="0 0.7 0.15"></a-sphere>
+        <a-cone color="#d4a373" radius-bottom="0.08" radius-top="0.02" height="0.25" position="0 0.68 0.38" rotation="-90 0 0"></a-cone>
+        <a-sphere color="#000" radius="0.05" position="-0.12 0.73 0.22"></a-sphere>
+        <a-sphere color="#000" radius="0.05" position="0.12 0.73 0.22"></a-sphere>
+        <a-box color="#7a5c45" width="0.5" height="0.05" depth="0.15" position="-0.3 0.4 0"></a-box>
+        <a-box color="#7a5c45" width="0.5" height="0.05" depth="0.15" position="0.3 0.4 0"></a-box>
+        <a-box color="#7a5c45" width="0.15" height="0.05" depth="0.35" position="0 0.4 -0.45"></a-box>
+        <a-text value="Garza Tigre" color="#fff" align="center" position="0 -0.3 0" scale="0.8 0.8 0.8"></a-text>
+      </a-entity>
     </a-marker>
 
     <!-- MARCADOR 4: Benteveo Común -->
     <a-marker type="pattern" url="./markers/pattern-ave4.patt" id="marker-4">
-      
+      <a-entity id="ave-4" scale="0.15 0.15 0.15">
+        <a-sphere color="#f4e285" radius="0.3" position="0 0.3 0"></a-sphere>
+        <a-sphere color="#f4e285" radius="0.18" position="0 0.55 0.18"></a-sphere>
+        <a-cone color="#d4a373" radius-bottom="0.06" radius-top="0.02" height="0.18" position="0 0.53 0.35" rotation="-90 0 0"></a-cone>
+        <a-sphere color="#000" radius="0.04" position="-0.08 0.58 0.26"></a-sphere>
+        <a-sphere color="#000" radius="0.04" position="0.08 0.58 0.26"></a-sphere>
+        <a-box color="#e0c080" width="0.5" height="0.05" depth="0.2" position="-0.3 0.3 0"></a-box>
+        <a-box color="#e0c080" width="0.5" height="0.05" depth="0.2" position="0.3 0.3 0"></a-box>
+        <a-box color="#e0c080" width="0.12" height="0.05" depth="0.2" position="0 0.3 -0.3"></a-box>
+        <a-text value="Benteveo" color="#fff" align="center" position="0 -0.3 0" scale="0.8 0.8 0.8"></a-text>
+      </a-entity>
     </a-marker>
 
-    <!-- Entidades básicas de iluminación para evitar modelos oscuros/negros -->
-    
-    
-
-    
   </a-scene>
 
   <script>
@@ -167,49 +214,52 @@
       const ave = avesData[id];
       nombreEl.innerText = ave.nombre;
       cientificoEl.innerText = ave.cientifico;
+      caracteristicasEl.innerHTML = `<strong>Características:</strong> ${ave.caracteristicas}`;
+      envergaduraEl.innerHTML = `<strong>Envergadura / Tamaño:</strong> ${ave.envergadura}`;
+      curiosidadEl.innerText = ave.curiosidad;
+      const modelo = document.getElementById(`ave-${id}`);
+      if (modelo) {
+        const currentScale = modelo.getAttribute('scale').x;
+        escalaTextoEl.innerText = currentScale.toFixed(2);
+      }
+    }
 
-caracteristicasEl.innerHTML = <strong>Características:</strong> ${ave.caracteristicas};
-envergaduraEl.innerHTML = <strong>Envergadura / Tamaño:</strong> ${ave.envergadura};
-curiosidadEl.innerText = ave.curiosidad;
-const modelo = document.getElementById(ave-${id});
-if (modelo) {
-const currentScale = modelo.getAttribute('scale').x;
-escalaTextoEl.innerText = currentScale.toFixed(2);
-}
-}
-// ARREGLADO: Se reincorporó el arreglo de IDs para solucionar el quiebre de sintaxis
-[1, 2, 3, 4].forEach(id => {
-const marker = document.getElementById(marker-${id});
-if (marker) {
-marker.addEventListener('markerFound', () => {
-debugEl.innerText = 🟢 Visualizando Ave #${id};
-actualizarInterfazAve(id);
-});
-marker.addEventListener('markerLost', () => {
-debugEl.innerText = "⏳ Buscando marcador en cámara...";
-});
-}
-});
-document.getElementById('btn-mas').addEventListener('click', () => {
-if (!aveActualId) return;
-const modelo = document.getElementById(ave-${aveActualId});
-if (modelo) {
-let scale = modelo.getAttribute('scale');
-let nuevaEscala = scale.x + 0.02;
-modelo.setAttribute('scale', ${nuevaEscala} ${nuevaEscala} ${nuevaEscala});
-escalaTextoEl.innerText = nuevaEscala.toFixed(2);
-}
-});
-document.getElementById('btn-menos').addEventListener('click', () => {
-if (!aveActualId) return;
-const modelo = document.getElementById(ave-${aveActualId});
-if (modelo) {
-let scale = modelo.getAttribute('scale');
-let nuevaEscala = Math.max(0.01, scale.x - 0.02);
-modelo.setAttribute('scale', ${nuevaEscala} ${nuevaEscala} ${nuevaEscala});
-escalaTextoEl.innerText = nuevaEscala.toFixed(2);
-}
-});
+    // Asignar eventos a los marcadores
+    [1, 2, 3, 4].forEach(id => {
+      const marker = document.getElementById(`marker-${id}`);
+      if (marker) {
+        marker.addEventListener('markerFound', () => {
+          debugEl.innerText = `🟢 Visualizando Ave #${id}`;
+          actualizarInterfazAve(id);
+        });
+        marker.addEventListener('markerLost', () => {
+          debugEl.innerText = "⏳ Buscando marcador en cámara...";
+        });
+      }
+    });
+
+    // Controles de escala
+    document.getElementById('btn-mas').addEventListener('click', () => {
+      if (!aveActualId) return;
+      const modelo = document.getElementById(`ave-${aveActualId}`);
+      if (modelo) {
+        let scale = modelo.getAttribute('scale');
+        let nuevaEscala = scale.x + 0.02;
+        modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
+        escalaTextoEl.innerText = nuevaEscala.toFixed(2);
+      }
+    });
+
+    document.getElementById('btn-menos').addEventListener('click', () => {
+      if (!aveActualId) return;
+      const modelo = document.getElementById(`ave-${aveActualId}`);
+      if (modelo) {
+        let scale = modelo.getAttribute('scale');
+        let nuevaEscala = Math.max(0.01, scale.x - 0.02);
+        modelo.setAttribute('scale', `${nuevaEscala} ${nuevaEscala} ${nuevaEscala}`);
+        escalaTextoEl.innerText = nuevaEscala.toFixed(2);
+      }
+    });
   </script>
 </body>
 </html>
